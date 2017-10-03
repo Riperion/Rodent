@@ -1,10 +1,12 @@
-package net.riperion.rodent;
+package net.riperion.rodent.controller;
 
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+
+import net.riperion.rodent.R;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -20,11 +22,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void onRegisterPressed(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setMessage("The register dialog is not ready yet! Try to login instead.").setTitle("Oops!");
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
     }
 }

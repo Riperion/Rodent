@@ -1,4 +1,4 @@
-package net.riperion.rodent;
+package net.riperion.rodent.controller;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -19,6 +19,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import net.riperion.rodent.R;
+import net.riperion.rodent.model.User;
 
 /**
  * A login screen that offers login via email/password.
@@ -96,13 +99,13 @@ public class LoginActivity extends AppCompatActivity {
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!User.validatePassword(password)) {
             mPasswordView.setError("Invalid password.");
             focusView = mPasswordView;
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(username)) {
+        if (!User.validateUsername(username)) {
             mUsernameView.setError("This field cannot be blank.");
             focusView = mUsernameView;
             cancel = true;
@@ -119,15 +122,6 @@ public class LoginActivity extends AppCompatActivity {
             mAuthTask = new UserLoginTask(this, username, password);
             mAuthTask.execute((Void) null);
         }
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return true;
-    }
-
-    private void onLoginSuccess() {
-
     }
 
     /**
@@ -160,7 +154,7 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final LoginActivity mActivity;
         private final String mUsername;
@@ -183,15 +177,7 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mUsername)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            return false;
+            return User.authenticateUser(mUsername, mPassword);
         }
 
         @Override

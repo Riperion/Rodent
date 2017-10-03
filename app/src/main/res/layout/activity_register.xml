@@ -8,16 +8,16 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="net.riperion.rodent.controller.LoginActivity">
+    tools:context="net.riperion.rodent.controller.RegisterActivity">
 
     <!-- Login progress -->
     <ScrollView
-        android:id="@+id/login_form"
+        android:id="@+id/register_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
+            android:id="@+id/email_registration_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -46,8 +46,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Password"
-                    android:imeActionId="@+id/login"
-                    android:imeActionLabel="Login"
+                    android:imeActionId="@+id/register"
+                    android:imeActionLabel="Register"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
@@ -55,20 +55,27 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <Switch
+                android:id="@+id/admin_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Register as admin?"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium.Inverse" />
+
             <Button
-                android:id="@+id/login_button"
+                android:id="@+id/register_button"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Login"
+                android:text="Register"
                 android:textStyle="bold" />
 
         </LinearLayout>
     </ScrollView>
 
     <ProgressBar
-        android:id="@+id/login_progress"
+        android:id="@+id/register_progress"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
