@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
+        android:name=".RodentApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -27,7 +28,20 @@
         <activity
             android:name=".controller.RegisterActivity"
             android:label="Register" />
-        <activity android:name=".controller.MainActivity"></activity>
+        <activity android:name=".controller.MainActivity" />
+        <activity
+            android:name=".controller.RatSightingListActivity"
+            android:label="@string/title_ratsighting_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".controller.RatSightingDetailActivity"
+            android:label="@string/title_ratsighting_detail"
+            android:parentActivityName=".controller.RatSightingListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="net.riperion.rodent.controller.RatSightingListActivity" />
+        </activity>
     </application>
 
 </manifest>
