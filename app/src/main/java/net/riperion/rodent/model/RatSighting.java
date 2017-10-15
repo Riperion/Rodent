@@ -32,6 +32,18 @@ public class RatSighting {
     private String latitude;
     private String longitude;
 
+    /**
+     * Construct a new Rat Sighting instance
+     * @param key the unique key for this sighting
+     * @param dateCreated the creation date of this sighting
+     * @param locationType the location type for this sighting
+     * @param zipCode the zip code of the location
+     * @param address the address of the location
+     * @param city the city the sighting was in
+     * @param borough the borough the sighting was in
+     * @param latitude the latitude of the location of the sighting
+     * @param longitude the longitude of the location of the sighting
+     */
     public RatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
         this.key = key;
         this.dateCreated = dateCreated;
@@ -80,6 +92,10 @@ public class RatSighting {
         return longitude;
     }
 
+    /**
+     * Constructs a string containing all details of a rat sighting
+     * @return string containing rat sighting details
+     */
     public String getDetails() {
         String result = "";
         result += String.format("Key: %d%n", key);
@@ -130,12 +146,29 @@ public class RatSighting {
         return ratSightingMap.get(key);
     }
 
+
+    /**
+     * Adds a rat sighting onto the database
+     *
+     * @param key the unique key for this sighting
+     * @param dateCreated the creation date of this sighting
+     * @param locationType the location type for this sighting
+     * @param zipCode the zip code of the location
+     * @param address the address of the location
+     * @param city the city the sighting was in
+     * @param borough the borough the sighting was in
+     * @param latitude the latitude of the location of the sighting
+     * @param longitude the longitude of the location of the sighting
+     */
     public static void addRatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
         RatSighting r = new RatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
         ratSightingList.add(r);
         ratSightingMap.put(r.key, r);
     }
 
+    /**
+     * Loads rat sightings from database into memory
+     */
     public static void loadRatSightings() {
         if (!loaded) {
             loaded = true;

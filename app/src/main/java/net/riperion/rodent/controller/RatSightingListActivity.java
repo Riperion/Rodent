@@ -119,6 +119,9 @@ public class RatSightingListActivity extends AppCompatActivity {
             return mValues.size();
         }
 
+        /**
+         * Represents individual cell in the recycler view holding the rat sighting's ID and Address
+         */
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mIdView;

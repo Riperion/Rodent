@@ -104,6 +104,7 @@ public class User {
      * @param isAdmin whether or not the user should be an admin
      * @throws IllegalArgumentException if the username or password is illegal
      * @throws IllegalArgumentException if a user with this username already exists
+     * @return whether or not the user was added successfully
      */
     public static boolean addUser(String username, String password, boolean isAdmin) {
         try {

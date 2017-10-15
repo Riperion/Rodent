@@ -9,6 +9,10 @@ import android.widget.TextView;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.User;
 
+/**
+ * This activity is now deprecated - it used to be the landing page after login
+ */
+@Deprecated
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -20,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
         messageView.setText("Welcome to Rodent, " + User.getCurrentUser().getUsername());
     }
 
+    /**
+     * Handle a logout button press by logging the user out and moving back to the splash activity
+     * @param view The button that is pressed on
+     */
     public void onLogoutPressed(View view) {
         Intent intent = new Intent(this, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

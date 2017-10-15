@@ -123,6 +123,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Shows the progress UI and hides the login form.
+     * @param show Whether the progress bar should be showed or hidden
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
@@ -157,6 +158,13 @@ public class LoginActivity extends AppCompatActivity {
         private final String mUsername;
         private final String mPassword;
 
+        /**
+         * Construct a new login task instance
+         *
+         * @param activity The activity that hosts the progress bar etc.
+         * @param username The username we're trying to log in with
+         * @param password The password we're trying to log in with
+         */
         UserLoginTask(LoginActivity activity, String username, String password) {
             mActivity = activity;
             mUsername = username;
@@ -165,15 +173,6 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
             return User.authenticateUser(mUsername, mPassword);
         }
 

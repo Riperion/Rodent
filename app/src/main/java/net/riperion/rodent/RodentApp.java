@@ -16,6 +16,10 @@ public class RodentApp extends Application {
         mContext = this;
     }
 
+    /**
+     * Allows access to the singleton application context
+     * @return the application context
+     */
     public static Context getContext(){
         return mContext;
     }
