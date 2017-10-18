@@ -1,5 +1,6 @@
 package net.riperion.rodent.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import net.riperion.rodent.R;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,13 +19,14 @@ import java.util.List;
  * Created by cgokmen on 10/10/17.
  */
 
-public class RatSighting {
+public class RatSighting implements Comparable<RatSighting> {
     private static ArrayList<RatSighting> ratSightingList = new ArrayList<>();
     private static HashMap<Integer, RatSighting> ratSightingMap = new HashMap<>();
     private static boolean loaded = false;
+    private static int maxKey = 0;
 
     private int key;
-    private String dateCreated;
+    private String date;
     private String locationType;
     private String zipCode;
     private String address;
@@ -35,7 +38,7 @@ public class RatSighting {
     /**
      * Construct a new Rat Sighting instance
      * @param key the unique key for this sighting
-     * @param dateCreated the creation date of this sighting
+     * @param date the date of this sighting
      * @param locationType the location type for this sighting
      * @param zipCode the zip code of the location
      * @param address the address of the location
@@ -44,9 +47,9 @@ public class RatSighting {
      * @param latitude the latitude of the location of the sighting
      * @param longitude the longitude of the location of the sighting
      */
-    public RatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
+    public RatSighting(int key, String date, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
         this.key = key;
-        this.dateCreated = dateCreated;
+        this.date = date;
         this.locationType = locationType;
         this.zipCode = zipCode;
         this.address = address;
@@ -60,8 +63,8 @@ public class RatSighting {
         return key;
     }
 
-    public String getDateCreated() {
-        return dateCreated;
+    public String getDate() {
+        return date;
     }
 
     public String getLocationType() {
@@ -99,7 +102,7 @@ public class RatSighting {
     public String getDetails() {
         String result = "";
         result += String.format("Key: %d%n", key);
-        result += String.format("Date created: %s%n", dateCreated);
+        result += String.format("Date created: %s%n", date);
         result += String.format("Location type: %s%n", locationType);
         result += String.format("Zip code: %s%n", zipCode);
         result += String.format("Address: %s%n", address);
@@ -151,7 +154,7 @@ public class RatSighting {
      * Adds a rat sighting onto the database
      *
      * @param key the unique key for this sighting
-     * @param dateCreated the creation date of this sighting
+     * @param dateCreated the date of this sighting
      * @param locationType the location type for this sighting
      * @param zipCode the zip code of the location
      * @param address the address of the location
@@ -160,10 +163,21 @@ public class RatSighting {
      * @param latitude the latitude of the location of the sighting
      * @param longitude the longitude of the location of the sighting
      */
-    public static void addRatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
+    public static void loadRatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
         RatSighting r = new RatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
         ratSightingList.add(r);
         ratSightingMap.put(r.key, r);
+
+        maxKey = Math.max(maxKey, r.getKey());
+    }
+
+    public static boolean addRatSighting(String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
+        int key = maxKey + 1;
+        loadRatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
+
+        Collections.sort(ratSightingList, Collections.reverseOrder());
+
+        return true; // For now! TODO
     }
 
     /**
@@ -193,8 +207,10 @@ public class RatSighting {
                     String latitude = row[49];
                     String longitude = row[50];
 
-                    addRatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
+                    loadRatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
                 }
+
+                Collections.sort(ratSightingList, Collections.reverseOrder());
 
                 Log.i("Loaded", String.format("Loaded %d rat sightings", ratSightingList.size()));
             } catch (IOException ex) {
@@ -207,5 +223,42 @@ public class RatSighting {
                 }
             }
         }
+    }
+
+    public static boolean validateDate(String date) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateLocationType(String locationType) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateZipCode(String zipCode) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateAddress(String address) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateCity(String city) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateBorough(String borough) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateLatitude(String latitude) {
+        return true; // TODO: Add validation logic!
+    }
+
+    public static boolean validateLongitude(String longitude) {
+        return true; // TODO: Add validation logic!
+    }
+
+    @Override
+    public int compareTo(@NonNull RatSighting ratSighting) {
+        return Integer.compare(this.getKey(),ratSighting.getKey()) ;
     }
 }
