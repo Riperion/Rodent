@@ -2,16 +2,19 @@ package net.riperion.rodent.model;
 
 import android.text.TextUtils;
 
-import java.util.ArrayList;
+import net.riperion.rodent.RodentApp;
+
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by cgokmen on 9/29/17.
  */
 
 public class User {
-    private static User currentUser = null;
-    private static ArrayList<User> users = new ArrayList<>();
-
     public static boolean validateUsername(String username) {
         return !TextUtils.isEmpty(username);
     }
@@ -20,81 +23,8 @@ public class User {
         return !TextUtils.isEmpty(password);
     }
 
-    private String mUsername;
-    private String mPassword;
-    private boolean mIsAdmin;
-
-    /**
-     * Creates a new user instance
-     *
-     * @param username the username of the user to add
-     * @param password the password of the user to add
-     * @param isAdmin whether or not the user should be an admin
-     * @throws IllegalArgumentException if the username or password is illegal
-     * @throws IllegalArgumentException if a user with this username already exists
-     */
-    private User(String username, String password, boolean isAdmin) {
-        if (!validateUsername(username) || !validatePassword(password)) {
-            throw new IllegalArgumentException("Invalid mUsername / password");
-        }
-
-        if (getUserByUsername(username) != null) {
-            throw new IllegalArgumentException("A user with this username already exists.");
-        }
-
-        this.mUsername = username.toLowerCase();
-        this.mPassword = password;
-        this.mIsAdmin = isAdmin;
-    }
-
-    public User(String username, String password) {
-        this(username, password, false);
-    }
-
-    public String getUsername() {
-        return mUsername;
-    }
-
-    public String getPassword() {
-        return mPassword;
-    }
-
-    /**
-     * Change the user's password
-     * @param password The new password
-     */
-    public void setPassword(String password) {
-        this.mPassword = password;
-    }
-
-    public boolean isAdmin() {
-        return mIsAdmin;
-    }
-
-    /**
-     * Get an array of all users from the database
-     *
-     * @return array of User instances for each user
-     */
-    public static User[] getUsers() {
-        return users.toArray(new User[0]);
-    }
-
-    /**
-     * Search the user database for a user with the given username
-     *
-     * @param username the username to search for
-     * @return the User instance with the given username, null if one doesn't exist
-     */
-    public static User getUserByUsername(String username) {
-        for (User u: users) {
-            if (u.getUsername().equalsIgnoreCase(username)) {
-                return u;
-            }
-        }
-
-        return null;
-    }
+    private static String currentUsername;
+    private static AuthToken authToken;
 
     /**
      * Creates a new user instance and adds it to the user database
@@ -106,16 +36,13 @@ public class User {
      * @throws IllegalArgumentException if a user with this username already exists
      * @return whether or not the user was added successfully
      */
-    public static boolean addUser(String username, String password, boolean isAdmin) {
-        try {
-            User u = new User(username, password, isAdmin);
-            users.add(u);
+    public static boolean addUser(String username, String password, boolean isAdmin) throws IOException {
+        Call<Void> call = RodentApp.getApi().createUser(new UserWrapper(username, password));
+        Response<Void> response = call.execute();
 
-            return true;
-            // TODO: Propagate exception
-        } catch (Exception e) {
-            return false;
-        }
+        return response.isSuccessful();
+
+        // TODO: What do we do about isAdmin?
     }
 
     /**
@@ -124,22 +51,44 @@ public class User {
      * @param password the password the user is trying to log in with
      * @return whether or not the login was successful
      */
-    public static boolean authenticateUser(String username, String password) {
-        User u = getUserByUsername(username);
+    public static boolean authenticateUser(String username, String password) throws IOException {
+        Call<AuthToken> call = RodentApp.getApi().login(new UserWrapper(username, password));
+        Response<AuthToken> response = call.execute();
 
-        if (u != null && u.getPassword().equals(password)) {
-            currentUser = u;
+        if (response.code() < 400) {
+            authToken = response.body();
+            currentUsername = username;
             return true;
         }
 
         return false;
+        // TODO: Propagate exception
+    }
+
+    public static void logoutUser(Callback<Void> cb) {
+        Call<Void> call = RodentApp.getApi().logout(authToken.get_authorization());
+        call.enqueue(cb);
     }
 
     /**
-     * Get the currently logged in user
-     * @return User instance for the logged in user
+     * Get the currently logged in user's username
+     * @return String containing the user's username
      */
-    public static User getCurrentUser() {
-        return currentUser;
+    public static String getCurrentUsername() {
+        return currentUsername;
+    }
+
+    public static AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    static class UserWrapper {
+        public String username;
+        public String password;
+
+        public UserWrapper(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
     }
 }

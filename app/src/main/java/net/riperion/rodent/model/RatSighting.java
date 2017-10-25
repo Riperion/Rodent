@@ -1,43 +1,42 @@
 package net.riperion.rodent.model;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import net.riperion.rodent.R;
+import com.google.gson.annotations.SerializedName;
+
 import net.riperion.rodent.RodentApp;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by cgokmen on 10/10/17.
  */
 
 public class RatSighting implements Comparable<RatSighting> {
-    private static ArrayList<RatSighting> ratSightingList = new ArrayList<>();
-    private static HashMap<Integer, RatSighting> ratSightingMap = new HashMap<>();
-    private static boolean loaded = false;
-    private static int maxKey = 0;
-
-    private int key;
-    private String date;
-    private String locationType;
-    private String zipCode;
+    private int id;
+    @SerializedName("date_created") private Date date;
+    @SerializedName("location_type") private String locationType;
+    @SerializedName("zip_code") private int zipCode;
     private String address;
     private String city;
     private String borough;
-    private String latitude;
-    private String longitude;
+    private BigDecimal latitude; // Made these decimals!
+    private BigDecimal longitude;
 
     /**
      * Construct a new Rat Sighting instance
-     * @param key the unique key for this sighting
+     * @param id the unique id for this sighting
      * @param date the date of this sighting
      * @param locationType the location type for this sighting
      * @param zipCode the zip code of the location
@@ -47,8 +46,8 @@ public class RatSighting implements Comparable<RatSighting> {
      * @param latitude the latitude of the location of the sighting
      * @param longitude the longitude of the location of the sighting
      */
-    public RatSighting(int key, String date, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
-        this.key = key;
+    public RatSighting(int id, Date date, String locationType, int zipCode, String address, String city, String borough, BigDecimal latitude, BigDecimal longitude) {
+        this.id = id;
         this.date = date;
         this.locationType = locationType;
         this.zipCode = zipCode;
@@ -59,11 +58,11 @@ public class RatSighting implements Comparable<RatSighting> {
         this.longitude = longitude;
     }
 
-    public int getKey() {
-        return key;
+    public Integer getId() {
+        return id;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
@@ -71,7 +70,7 @@ public class RatSighting implements Comparable<RatSighting> {
         return locationType;
     }
 
-    public String getZipCode() {
+    public int getZipCode() {
         return zipCode;
     }
 
@@ -87,11 +86,11 @@ public class RatSighting implements Comparable<RatSighting> {
         return borough;
     }
 
-    public String getLatitude() {
+    public BigDecimal getLatitude() {
         return latitude;
     }
 
-    public String getLongitude() {
+    public BigDecimal getLongitude() {
         return longitude;
     }
 
@@ -101,7 +100,7 @@ public class RatSighting implements Comparable<RatSighting> {
      */
     public String getDetails() {
         String result = "";
-        result += String.format("Key: %d%n", key);
+        result += String.format("Key: %d%n", id);
         result += String.format("Date created: %s%n", date);
         result += String.format("Location type: %s%n", locationType);
         result += String.format("Zip code: %s%n", zipCode);
@@ -117,7 +116,7 @@ public class RatSighting implements Comparable<RatSighting> {
         this.locationType = locationType;
     }
 
-    public void setZipCode(String zipCode) {
+    public void setZipCode(int zipCode) {
         this.zipCode = zipCode;
     }
 
@@ -133,28 +132,79 @@ public class RatSighting implements Comparable<RatSighting> {
         this.borough = borough;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(BigDecimal latitude) {
         this.latitude = latitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
     }
 
-    public static List<RatSighting> getRatSightings() {
-        return ratSightingList;
-    }
+    /**
+     * Synchronously gets an unfiltered list of rat sightings from the API
+     * @param offset the offset from which we paginate
+     * @return List of RatSighting objects retrieved
+     * @throws IOException If something goes wrong with the API call
+     */
+    public static List<RatSighting> getRatSightings(Integer offset) throws IOException {
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(User.getAuthToken().get_authorization(), offset);
+        Response<ListWrapper<RatSighting>> response = call.execute();
 
-    public static RatSighting getRatSightingByKey(int key) {
-        return ratSightingMap.get(key);
+        return response.body().getResults();
     }
-
 
     /**
-     * Adds a rat sighting onto the database
-     *
-     * @param key the unique key for this sighting
-     * @param dateCreated the date of this sighting
+     * Asynchronously gets an unfiltered list of rat sightings from the API
+     * @param cb class that will be called as the callback once values are returned
+     * @param offset the offset from which we paginate
+     */
+    public static void asyncGetRatSightings(Callback<ListWrapper<RatSighting>> cb, Integer offset) {
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(User.getAuthToken().get_authorization(), offset);
+        call.enqueue(cb);
+
+        // TODO: Add unwrapper middleware
+    }
+
+    /**
+     * Synchronously gets a single rat sighting from the API using its key
+     * @param id the ID of the rat sighting we're looking for
+     * @return the corresponding RatSighting object
+     * @throws IOException If something goes wrong with the API call
+     */
+    public static RatSighting getRatSightingByKey(int id) throws IOException {
+        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(User.getAuthToken().get_authorization(), id);
+        Response<RatSighting> response = call.execute();
+
+        return response.body();
+    }
+
+    /**
+     * Asynchronously gets a single rat sighting from the API using its key
+     * @param id the ID of the rat sighting we're looking for
+     * @param cb class that will be called as the callback once values are returned
+     */
+    public static void asyncGetRatSightingByKey(int id, Callback<RatSighting> cb) {
+        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(User.getAuthToken().get_authorization(), id);
+        call.enqueue(cb);
+    }
+
+    /**
+     * Asynchronously gets a list of rat sightings using a date range
+     * @param cb class that will be called as the callback once values are returned
+     * @param startDate the start date of the range
+     * @param endDate the end date of the range
+     */
+    public static void asyncGetRatSightingByDateRange(Date startDate, Date endDate, Callback<ListWrapper<RatSighting>> cb) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightingsByDateRange(User.getAuthToken().get_authorization(), 0, dateFormat.format(startDate), dateFormat.format(endDate));
+        call.enqueue(cb);
+
+        // TODO: Add unwrapper middleware
+    }
+
+    /**
+     * Synchronously sends a new Rat Sighting to the API
      * @param locationType the location type for this sighting
      * @param zipCode the zip code of the location
      * @param address the address of the location
@@ -162,67 +212,14 @@ public class RatSighting implements Comparable<RatSighting> {
      * @param borough the borough the sighting was in
      * @param latitude the latitude of the location of the sighting
      * @param longitude the longitude of the location of the sighting
+     * @return boolean denoting whether the item was added successfully
+     * @throws IOException If something goes wrong with the API call
      */
-    public static void loadRatSighting(int key, String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
-        RatSighting r = new RatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
-        ratSightingList.add(r);
-        ratSightingMap.put(r.key, r);
+    public static boolean addRatSighting(String locationType, int zipCode, String address, String city, String borough, BigDecimal latitude, BigDecimal longitude) throws IOException {
+        Call<Void> call = RodentApp.getApi().addRatSighting(User.getAuthToken().get_authorization(), locationType, zipCode, address, city, borough, latitude, longitude);
+        Response<Void> request = call.execute();
 
-        maxKey = Math.max(maxKey, r.getKey());
-    }
-
-    public static boolean addRatSighting(String dateCreated, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
-        int key = maxKey + 1;
-        loadRatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
-
-        Collections.sort(ratSightingList, Collections.reverseOrder());
-
-        return true; // For now! TODO
-    }
-
-    /**
-     * Loads rat sightings from database into memory
-     */
-    public static void loadRatSightings() {
-        if (!loaded) {
-            loaded = true;
-            InputStream inputStream = RodentApp.getContext().getResources().openRawResource(R.raw.data);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            try {
-                String csvLine = reader.readLine();
-                while ((csvLine = reader.readLine()) != null) {
-                    String[] row = csvLine.split(",", -1);
-                    //Log.i("Line", csvLine);
-                    //Log.i("entry count", "" + row.length);
-
-                    int key = Integer.parseInt(row[0]);
-                    //Log.i("key", "" + key);
-
-                    String dateCreated = row[1];
-                    String locationType = row[7];
-                    String zipCode = row[8];
-                    String address = row[9];
-                    String city = row[16];
-                    String borough = row[23];
-                    String latitude = row[49];
-                    String longitude = row[50];
-
-                    loadRatSighting(key, dateCreated, locationType, zipCode, address, city, borough, latitude, longitude);
-                }
-
-                Collections.sort(ratSightingList, Collections.reverseOrder());
-
-                Log.i("Loaded", String.format("Loaded %d rat sightings", ratSightingList.size()));
-            } catch (IOException ex) {
-                throw new RuntimeException("Error in reading CSV file: " + ex);
-            } finally {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException("Error while closing input stream: " + e);
-                }
-            }
-        }
+        return request.isSuccessful();
     }
 
     public static boolean validateDate(String date) {
@@ -234,7 +231,12 @@ public class RatSighting implements Comparable<RatSighting> {
     }
 
     public static boolean validateZipCode(String zipCode) {
-        return true; // TODO: Add validation logic!
+        try {
+            Integer.parseInt(zipCode);
+            return true;
+        } catch (Exception e) {
+            return false; // TODO: Add validation logic!
+        }
     }
 
     public static boolean validateAddress(String address) {
@@ -250,15 +252,25 @@ public class RatSighting implements Comparable<RatSighting> {
     }
 
     public static boolean validateLatitude(String latitude) {
-        return true; // TODO: Add validation logic!
+        try {
+            BigDecimal bd = new BigDecimal(latitude);
+            return true;
+        } catch (Exception e) {
+            return false; // TODO: Add validation logic!
+        }
     }
 
     public static boolean validateLongitude(String longitude) {
-        return true; // TODO: Add validation logic!
+        try {
+            BigDecimal bd = new BigDecimal(longitude);
+            return true;
+        } catch (Exception e) {
+            return false; // TODO: Add validation logic!
+        }
     }
 
     @Override
     public int compareTo(@NonNull RatSighting ratSighting) {
-        return Integer.compare(this.getKey(),ratSighting.getKey()) ;
+        return Integer.compare(this.getId(),ratSighting.getId()) ;
     }
 }

@@ -21,6 +21,11 @@ import android.widget.TextView;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -32,7 +37,6 @@ public class ReportActivity extends AppCompatActivity {
     private ReportSightingTask mReportTask = null;
 
     // UI references.
-    private EditText mDateView;
     private EditText mLocationTypeView;
     private EditText mZipCodeView;
     private EditText mAddressView;
@@ -48,7 +52,6 @@ public class ReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
         // Set up the login form.
-        mDateView = (EditText) findViewById(R.id.date_input);
         mLocationTypeView = (EditText) findViewById(R.id.location_type_input);
         mZipCodeView = (EditText) findViewById(R.id.zipcode_input);
         mAddressView = (EditText) findViewById(R.id.address_input);
@@ -91,11 +94,9 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         // Reset errors.
-        mDateView.setError(null);
         mLongitudeView.setError(null);
 
         // Store values at the time of the login attempt.
-        String date = mDateView.getText().toString();
         String locationType = mLocationTypeView.getText().toString();
         String zipCode = mZipCodeView.getText().toString();
         String address = mAddressView.getText().toString();
@@ -107,12 +108,6 @@ public class ReportActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        if (!RatSighting.validateDate(date)) {
-            mDateView.setError("Invalid sighting date.");
-            focusView = mDateView;
-            cancel = true;
-        }
-
         if (!RatSighting.validateLocationType(locationType)) {
             mLocationTypeView.setError("Invalid location type.");
             focusView = mLocationTypeView;
@@ -120,7 +115,7 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         if (!RatSighting.validateZipCode(zipCode)) {
-            mZipCodeView.setError("Invalid sighting date.");
+            mZipCodeView.setError("Invalid zip code.");
             focusView = mZipCodeView;
             cancel = true;
         }
@@ -163,7 +158,7 @@ public class ReportActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mReportTask = new ReportSightingTask(this, date, locationType, zipCode, address, city, borough, latitude, longitude);
+            mReportTask = new ReportSightingTask(this, locationType, Integer.parseInt(zipCode), address, city, borough, new BigDecimal(latitude), new BigDecimal(latitude));
             mReportTask.execute((Void) null);
         }
     }
@@ -198,18 +193,16 @@ public class ReportActivity extends AppCompatActivity {
     private class ReportSightingTask extends AsyncTask<Void, Void, Boolean> {
 
         private final ReportActivity mActivity;
-        private String date;
         private String locationType;
-        private String zipCode;
+        private int zipCode;
         private String address;
         private String city;
         private String borough;
-        private String latitude;
-        private String longitude;
+        private BigDecimal latitude;
+        private BigDecimal longitude;
 
-        ReportSightingTask(ReportActivity activity, String date, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
+        ReportSightingTask(ReportActivity activity, String locationType, int zipCode, String address, String city, String borough, BigDecimal latitude, BigDecimal longitude) {
             mActivity = activity;
-            this.date = date;
             this.locationType = locationType;
             this.zipCode = zipCode;
             this.address = address;
@@ -221,7 +214,12 @@ public class ReportActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return RatSighting.addRatSighting(date, locationType, zipCode, address, city, borough, latitude, longitude);
+            try {
+                return RatSighting.addRatSighting(locationType, zipCode, address, city, borough, latitude, longitude);
+            } catch (IOException e) {
+                e.printStackTrace(); // TODO: handle this
+                return false;
+            }
         }
 
         @Override

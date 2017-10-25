@@ -12,13 +12,17 @@ import android.widget.TextView;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * A fragment representing a single Rat Sighting detail screen.
  * This fragment is either contained in a {@link RatSightingListActivity}
  * in two-pane mode (on tablets) or a {@link RatSightingDetailActivity}
  * on handsets.
  */
-public class RatSightingDetailFragment extends Fragment {
+public class RatSightingDetailFragment extends Fragment implements Callback<RatSighting> {
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -29,6 +33,8 @@ public class RatSightingDetailFragment extends Fragment {
      * The dummy content this fragment is presenting.
      */
     private RatSighting mItem;
+
+    private boolean viewCreated;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -45,13 +51,8 @@ public class RatSightingDetailFragment extends Fragment {
             // Load the dummy content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = RatSighting.getRatSightingByKey(getArguments().getInt(ARG_ITEM_ID));
-
-            Activity activity = this.getActivity();
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
-            if (appBarLayout != null) {
-                appBarLayout.setTitle("" + mItem.getKey());
-            }
+            mItem = null; // For now!
+            RatSighting.asyncGetRatSightingByKey(getArguments().getInt(ARG_ITEM_ID), this);
         }
     }
 
@@ -65,6 +66,30 @@ public class RatSightingDetailFragment extends Fragment {
             ((TextView) rootView.findViewById(R.id.ratsighting_detail)).setText(mItem.getDetails());
         }
 
+        viewCreated = true;
+
         return rootView;
+    }
+
+    @Override
+    public void onResponse(Call<RatSighting> call, Response<RatSighting> response) {
+        if (viewCreated) {
+            mItem = response.body();
+
+            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) this.getActivity().findViewById(R.id.toolbar_layout);
+
+            if (appBarLayout != null) {
+                appBarLayout.setTitle("" + mItem.getId());
+            }
+
+            View rootView = this.getView();
+            ((TextView) rootView.findViewById(R.id.ratsighting_detail)).setText(mItem.getDetails());
+        }
+    }
+
+    @Override
+    public void onFailure(Call<RatSighting> call, Throwable t) {
+        // TODO: What to do here?
+        t.printStackTrace();
     }
 }

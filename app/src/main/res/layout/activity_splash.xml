@@ -5,13 +5,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/progress_view"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
     <ScrollView
         android:id="@+id/splash_view"
         android:layout_width="match_parent"

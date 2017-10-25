@@ -35,18 +35,6 @@
                 android:layout_height="match_parent">
 
                 <EditText
-                    android:id="@+id/date_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Date"
-                    android:inputType="datetime|date" />
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <EditText
                     android:id="@+id/location_type_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

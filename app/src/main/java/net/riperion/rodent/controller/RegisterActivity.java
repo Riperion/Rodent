@@ -202,6 +202,7 @@ public class RegisterActivity extends AppCompatActivity {
             try {
                 return User.addUser(mUsername, mPassword, mIsAdmin);
             } catch (Exception e) {
+                e.printStackTrace();
                 // TODO: Add some sort of error
             }
 

@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView messageView = (TextView) findViewById(R.id.textView2);
-        messageView.setText("Welcome to Rodent, " + User.getCurrentUser().getUsername());
+        messageView.setText("Welcome to Rodent, " + User.getCurrentUsername());
     }
 
     /**

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,9 +14,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import net.riperion.rodent.R;
+import net.riperion.rodent.model.ListWrapper;
 import net.riperion.rodent.model.RatSighting;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * An activity representing a list of Rat Sightings. This activity
@@ -27,13 +32,17 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class RatSightingListActivity extends AppCompatActivity {
+public class RatSightingListActivity extends AppCompatActivity implements Callback<ListWrapper<RatSighting>>  {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+
+    private RecyclerView mRecyclerView;
+
+    private boolean requestPresent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +63,9 @@ public class RatSightingListActivity extends AppCompatActivity {
             }
         });
 
-        View recyclerView = findViewById(R.id.ratsighting_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.ratsighting_list);
+        assert mRecyclerView != null;
+        setupRecyclerView(mRecyclerView);
 
         if (findViewById(R.id.ratsighting_detail_container) != null) {
             // The detail container view will be present only in the
@@ -65,10 +74,56 @@ public class RatSightingListActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!recyclerView.canScrollVertically(1)) {
+                    getMoreRatSightings();
+                }
+            }
+        });
+
+        requestPresent = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.clear();
+        getMoreRatSightings();
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(RatSighting.getRatSightings()));
+        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(new ArrayList<RatSighting>());
+        recyclerView.setAdapter(adapter);
+        getMoreRatSightings();
+    }
+
+    private void getMoreRatSightings() {
+        if (!requestPresent) {
+            int size = ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.size();
+            RatSighting.asyncGetRatSightings(this, size);
+            requestPresent = true;
+        }
+    }
+
+    @Override
+    public void onResponse(Call<ListWrapper<RatSighting>> call, Response<ListWrapper<RatSighting>> response) {
+        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.addAll(response.body().getResults());
+        System.out.println("Got " + response.body().getResults().size() + " new items!");
+        mRecyclerView.getAdapter().notifyDataSetChanged();
+
+        requestPresent = false;
+    }
+
+    @Override
+    public void onFailure(Call<ListWrapper<RatSighting>> call, Throwable t) {
+        // Todo: What to do here? :(
+        requestPresent = false;
+        t.printStackTrace();
     }
 
     public class SimpleItemRecyclerViewAdapter
@@ -90,7 +145,7 @@ public class RatSightingListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.mItem = mValues.get(position);
-            holder.mIdView.setText("" + mValues.get(position).getKey());
+            holder.mIdView.setText("" + mValues.get(position).getId());
             holder.mContentView.setText(mValues.get(position).getAddress());
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -98,7 +153,7 @@ public class RatSightingListActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        arguments.putInt(RatSightingDetailFragment.ARG_ITEM_ID, holder.mItem.getKey());
+                        arguments.putInt(RatSightingDetailFragment.ARG_ITEM_ID, holder.mItem.getId());
                         RatSightingDetailFragment fragment = new RatSightingDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()
@@ -107,7 +162,7 @@ public class RatSightingListActivity extends AppCompatActivity {
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, RatSightingDetailActivity.class);
-                        intent.putExtra(RatSightingDetailFragment.ARG_ITEM_ID, holder.mItem.getKey());
+                        intent.putExtra(RatSightingDetailFragment.ARG_ITEM_ID, holder.mItem.getId());
 
                         context.startActivity(intent);
                     }
