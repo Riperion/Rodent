@@ -1,7 +1,6 @@
 package net.riperion.rodent.model;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -15,7 +14,8 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * Created by cgokmen on 10/25/17.
+ * This interface contains the API methods the current Rodent API is compatible with.
+ * It is used by the Retrofit library to generate a callable API object.
  */
 
 public interface RodentAPI {
@@ -40,4 +40,7 @@ public interface RodentAPI {
 
     @GET("/api/ratsightings/{id}/")
     Call<RatSighting> getRatSightingById(@Header("Authorization") String authorization, @Path("id") int id);
+
+    @GET("/api/stats/")
+    Call<List<DateCountPair>> getRatSightingsMonthlyStats(@Header("Authorization") String authorization);
 }

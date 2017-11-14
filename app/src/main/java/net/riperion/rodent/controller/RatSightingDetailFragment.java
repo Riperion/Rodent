@@ -1,7 +1,8 @@
 package net.riperion.rodent.controller;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
+import net.riperion.rodent.model.RatSightingQuery;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -52,7 +54,7 @@ public class RatSightingDetailFragment extends Fragment implements Callback<RatS
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
             mItem = null; // For now!
-            RatSighting.asyncGetRatSightingByKey(getArguments().getInt(ARG_ITEM_ID), this);
+            RatSightingQuery.asyncGetRatSightingByKey(getArguments().getInt(ARG_ITEM_ID), this);
         }
     }
 
@@ -72,24 +74,27 @@ public class RatSightingDetailFragment extends Fragment implements Callback<RatS
     }
 
     @Override
-    public void onResponse(Call<RatSighting> call, Response<RatSighting> response) {
+    public void onResponse(@NonNull Call<RatSighting> call, @NonNull Response<RatSighting> response) {
         if (viewCreated) {
             mItem = response.body();
 
-            CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) this.getActivity().findViewById(R.id.toolbar_layout);
+            CollapsingToolbarLayout appBarLayout = this.getActivity().findViewById(R.id.toolbar_layout);
 
             if (appBarLayout != null) {
                 appBarLayout.setTitle("" + mItem.getId());
             }
 
             View rootView = this.getView();
+            assert rootView != null;
             ((TextView) rootView.findViewById(R.id.ratsighting_detail)).setText(mItem.getDetails());
         }
     }
 
     @Override
-    public void onFailure(Call<RatSighting> call, Throwable t) {
-        // TODO: What to do here?
-        t.printStackTrace();
+    public void onFailure(@NonNull Call<RatSighting> call, @NonNull Throwable t) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setMessage("An error occurred trying to fetch rat sighting report details.").setTitle("Oops!");
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

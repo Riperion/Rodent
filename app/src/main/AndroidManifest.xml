@@ -9,7 +9,7 @@
         android:name=".RodentApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Rodent"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -33,14 +33,13 @@
         <activity
             android:name=".controller.RegisterActivity"
             android:label="Register" />
-        <activity android:name=".controller.MainActivity" />
         <activity
             android:name=".controller.RatSightingListActivity"
-            android:label="@string/title_ratsighting_list"
+            android:label="Rat Sighting List"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".controller.RatSightingDetailActivity"
-            android:label="@string/title_ratsighting_detail"
+            android:label="Rat Sighting Detail"
             android:parentActivityName=".controller.RatSightingListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -49,12 +48,17 @@
         </activity>
         <activity
             android:name=".controller.ReportActivity"
-            android:label="@string/title_activity_report" />
+            android:label="Report Rat Sighting" />
         <activity
             android:name=".controller.ApplicationActivity"
-            android:label="@string/title_activity_application"
+            android:label="Rodent"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".controller.MapActivity"></activity>
+        <activity
+            android:name=".controller.MapActivity"
+            android:label="Rat Sighting Map" />
+        <activity
+            android:name=".controller.GraphActivity"
+            android:label="Rat Sighting Count Chart" />
     </application>
 
 </manifest>

@@ -17,11 +17,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.User;
+
+import java.io.IOException;
 
 /**
  * A login screen that offers login via email/password.
@@ -35,7 +36,6 @@ public class RegisterActivity extends AppCompatActivity {
     // UI references.
     private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
-    private Switch mIsAdminView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -68,7 +68,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.register_form);
         mProgressView = findViewById(R.id.register_progress);
-        mIsAdminView = (Switch) findViewById(R.id.admin_switch);
     }
 
     /**
@@ -85,48 +84,24 @@ public class RegisterActivity extends AppCompatActivity {
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values at the time of the registration attempt.
         String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
-        boolean isAdmin = mIsAdminView.isChecked();
 
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid password, if the user entered one.
-        if (!User.validatePassword(password)) {
-            mPasswordView.setError("Invalid password.");
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
-        if (!User.validateUsername(username)) {
-            mUsernameView.setError("This field cannot be blank.");
-            focusView = mUsernameView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mRegisterTask = new UserRegisterTask(username, password, isAdmin);
-            mRegisterTask.execute((Void) null);
-        }
+        // Show a progress spinner, and kick off a background task to
+        // perform the user registration attempt.
+        showProgress(true);
+        mRegisterTask = new UserRegisterTask(username, password);
+        mRegisterTask.execute((Void) null);
     }
 
-    private void onPostRegister(boolean success) {
+    private void onPostRegister(boolean success, Exception e) {
         mRegisterTask = null;
         showProgress(false);
+        final RegisterActivity thisActivity = this;
 
         if (success) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-            final RegisterActivity thisActivity = this;
 
             builder.setMessage("Registration was successful! Click on the login button to log in.").setTitle("Success!");
             builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -141,13 +116,42 @@ public class RegisterActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
-            mPasswordView.setError("Unknown error.");
-            mPasswordView.requestFocus();
+            // There has to have been an exception
+            assert e != null;
+
+            if (e instanceof User.InvalidUserException) {
+                // We handle this by highlighting the appropriate field
+                EditText focusView = null;
+
+                switch (((User.InvalidUserException) e).getReason()) {
+                    case BAD_USERNAME:
+                        focusView = mUsernameView;
+                        break;
+                    case BAD_PASSWORD:
+                        focusView = mPasswordView;
+                        break;
+                }
+
+                focusView.setError("Invalid input.");
+                focusView.requestFocus();
+            } else {
+                String message = "An unexpected error occurred.";
+
+                if (e instanceof IOException) {
+                    message = "An error occurred while trying to connect to the server.";
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                builder.setMessage(message).setTitle("Oops!");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     }
 
     /**
      * Shows the progress UI and hides the login form.
+     * @param show Whether or not the progress UI should be shown
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
@@ -180,30 +184,24 @@ public class RegisterActivity extends AppCompatActivity {
 
         private final String mUsername;
         private final String mPassword;
-        private final boolean mIsAdmin;
+        private Exception exception;
 
-        UserRegisterTask(String username, String password, boolean isAdmin) {
+        /**
+         * Constructs an user registration task object with the given user details
+         * @param username User's username
+         * @param password User's password
+         */
+        private UserRegisterTask(String username, String password) {
             mUsername = username;
             mPassword = password;
-            mIsAdmin = isAdmin;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
-                // Simulate network access.
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            try {
-                return User.addUser(mUsername, mPassword, mIsAdmin);
+                return User.addUser(mUsername, mPassword);
             } catch (Exception e) {
-                e.printStackTrace();
-                // TODO: Add some sort of error
+                this.exception = e;
             }
 
             return false;
@@ -211,7 +209,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            onPostRegister(success);
+            onPostRegister(success, this.exception);
         }
 
         @Override

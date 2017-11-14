@@ -11,7 +11,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Created by cgokmen on 9/29/17.
+ * This class represents statically the User that is currently authenticated on the application.
  */
 
 public class User {
@@ -31,18 +31,21 @@ public class User {
      *
      * @param username the username of the user to add
      * @param password the password of the user to add
-     * @param isAdmin whether or not the user should be an admin
-     * @throws IllegalArgumentException if the username or password is illegal
-     * @throws IllegalArgumentException if a user with this username already exists
-     * @return whether or not the user was added successfully
+     * @return whether or not the user was added successful
+     * @throws InvalidUserException if the username or password is invalid
+     * @throws IOException if an error occurs while trying to connect to the API
      */
-    public static boolean addUser(String username, String password, boolean isAdmin) throws IOException {
+    public static boolean addUser(String username, String password) throws IOException, InvalidUserException {
+        if (!validateUsername(username))
+            throw new InvalidUserException(InvalidUserException.InvalidUserReason.BAD_USERNAME);
+
+        if (!validatePassword(password))
+            throw new InvalidUserException(InvalidUserException.InvalidUserReason.BAD_PASSWORD);
+
         Call<Void> call = RodentApp.getApi().createUser(new UserWrapper(username, password));
         Response<Void> response = call.execute();
 
         return response.isSuccessful();
-
-        // TODO: What do we do about isAdmin?
     }
 
     /**
@@ -50,6 +53,7 @@ public class User {
      * @param username the username of the user to authenticate
      * @param password the password the user is trying to log in with
      * @return whether or not the login was successful
+     * @throws IOException if an error occurs while trying to connect to the API
      */
     public static boolean authenticateUser(String username, String password) throws IOException {
         Call<AuthToken> call = RodentApp.getApi().login(new UserWrapper(username, password));
@@ -62,11 +66,10 @@ public class User {
         }
 
         return false;
-        // TODO: Propagate exception
     }
 
     public static void logoutUser(Callback<Void> cb) {
-        Call<Void> call = RodentApp.getApi().logout(authToken.get_authorization());
+        Call<Void> call = RodentApp.getApi().logout(authToken.getAuthorization());
         call.enqueue(cb);
     }
 
@@ -83,12 +86,30 @@ public class User {
     }
 
     static class UserWrapper {
-        public String username;
-        public String password;
+        public final String username;
+        public final String password;
 
         public UserWrapper(String username, String password) {
             this.username = username;
             this.password = password;
+        }
+    }
+
+    public static class InvalidUserException extends Exception {
+        public enum InvalidUserReason {
+            BAD_USERNAME,
+            BAD_PASSWORD
+        }
+
+        private final InvalidUserReason reason;
+
+        public InvalidUserException(InvalidUserReason reason) {
+            super(reason.name());
+            this.reason = reason;
+        }
+
+        public InvalidUserReason getReason() {
+            return reason;
         }
     }
 }

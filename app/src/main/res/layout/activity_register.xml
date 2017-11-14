@@ -17,7 +17,6 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/email_registration_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -32,8 +31,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Username"
                     android:inputType="text"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -50,17 +48,9 @@
                     android:imeActionLabel="Register"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLines="1" />
 
             </android.support.design.widget.TextInputLayout>
-
-            <Switch
-                android:id="@+id/admin_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Register as admin?"
-                android:textAppearance="@android:style/TextAppearance.Material.Medium.Inverse" />
 
             <Button
                 android:id="@+id/register_button"

@@ -1,11 +1,12 @@
 package net.riperion.rodent.model;
 
 /**
- * Created by cgokmen on 10/25/17.
+ * This class represents the authentication token that is obtained from the API on login
+ * and sent with each the API call for authentication.
  */
 
 class AuthToken {
-    private String auth_token;
+    private final String auth_token;
 
     /**
      * Creates an authentication token instance - for use by the GSON deserializer
@@ -19,7 +20,7 @@ class AuthToken {
      * Gets the authentication token string
      * @return the token string
      */
-    public String get_auth_token() {
+    public String getAuthToken() {
         return auth_token;
     }
 
@@ -27,7 +28,7 @@ class AuthToken {
      * Gets the authorization header contents to be used on API calls
      * @return authorization header contents
      */
-    public String get_authorization() {
+    public String getAuthorization() {
         return "Token " + auth_token;
     }
 }

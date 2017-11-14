@@ -1,5 +1,6 @@
 package net.riperion.rodent.controller;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.ListWrapper;
 import net.riperion.rodent.model.RatSighting;
+import net.riperion.rodent.model.RatSightingQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,25 +107,29 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
     private void getMoreRatSightings() {
         if (!requestPresent) {
             int size = ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.size();
-            RatSighting.asyncGetRatSightings(this, size);
+            RatSightingQuery.asyncGetRatSightings(this, size);
             requestPresent = true;
         }
     }
 
     @Override
-    public void onResponse(Call<ListWrapper<RatSighting>> call, Response<ListWrapper<RatSighting>> response) {
-        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.addAll(response.body().getResults());
-        System.out.println("Got " + response.body().getResults().size() + " new items!");
+    public void onResponse(@NonNull Call<ListWrapper<RatSighting>> call, @NonNull Response<ListWrapper<RatSighting>> response) {
+        ListWrapper<RatSighting> body = response.body();
+        assert body != null;
+        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.addAll(body.getResults());
         mRecyclerView.getAdapter().notifyDataSetChanged();
 
         requestPresent = false;
     }
 
     @Override
-    public void onFailure(Call<ListWrapper<RatSighting>> call, Throwable t) {
-        // Todo: What to do here? :(
+    public void onFailure(@NonNull Call<ListWrapper<RatSighting>> call, @NonNull Throwable t) {
         requestPresent = false;
-        t.printStackTrace();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("An error occurred trying to fetch rat sighting reports.").setTitle("Oops!");
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public class SimpleItemRecyclerViewAdapter
@@ -187,8 +193,8 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mIdView = (TextView) view.findViewById(R.id.id);
-                mContentView = (TextView) view.findViewById(R.id.content);
+                mIdView = view.findViewById(R.id.id);
+                mContentView = view.findViewById(R.id.content);
             }
 
             @Override

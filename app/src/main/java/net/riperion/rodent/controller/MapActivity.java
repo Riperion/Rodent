@@ -3,6 +3,7 @@ package net.riperion.rodent.controller;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -11,12 +12,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,11 +25,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.ListWrapper;
 import net.riperion.rodent.model.RatSighting;
+import net.riperion.rodent.model.RatSightingQuery;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -44,16 +42,16 @@ import retrofit2.Response;
  * This activity is the controller for the view that hosts the Map view of the sightings.
  */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, Callback<ListWrapper<RatSighting>> {
-    GoogleMap map;
+    private GoogleMap map;
 
-    EditText startDateEdit;
-    EditText endDateEdit;
-    boolean queryInProgress;
+    private EditText startDateEdit;
+    private EditText endDateEdit;
+    private boolean queryInProgress;
 
     /**
      * The date format we display and parse from the date fields
      */
-    public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +122,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
      * The button press handler for the Go / Search button
      * @param view the button that was pressed (always equals the Go button)
      */
-    public void onGoPressed(View view) {
+    public void onGoPressed(@SuppressWarnings("UnusedParameters") View view) {
         try {
             // Validate the date
             String startDateString = startDateEdit.getText().toString();
@@ -150,13 +148,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void requestData(Date startDate, Date endDate) {
         if (!this.queryInProgress) {
             this.queryInProgress = true;
-            RatSighting.asyncGetRatSightingByDateRange(startDate, endDate, this);
+            RatSightingQuery.asyncGetRatSightingByDateRange(startDate, endDate, this);
         }
     }
 
     @Override
-    public void onResponse(Call<ListWrapper<RatSighting>> call, Response<ListWrapper<RatSighting>> response) {
-        List<RatSighting> rats = response.body().getResults();
+    public void onResponse(@NonNull Call<ListWrapper<RatSighting>> call, @NonNull Response<ListWrapper<RatSighting>> response) {
+        ListWrapper<RatSighting> body = response.body();
+        assert body != null;
+        List<RatSighting> rats = body.getResults();
 
         if (rats.size() > 0) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -180,7 +180,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onFailure(Call<ListWrapper<RatSighting>> call, Throwable t) {
+    public void onFailure(@NonNull Call<ListWrapper<RatSighting>> call, @NonNull Throwable t) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Something went wrong trying to get data from the server :(").setTitle("Oops!");
         AlertDialog dialog = builder.create();

@@ -19,7 +19,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/button_query"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+        app:srcCompat="@android:drawable/ic_menu_sort_by_size"
+        android:contentDescription="List Button" />
 
     <ImageButton
         android:id="@+id/button_query"
@@ -32,7 +33,8 @@
         app:layout_constraintLeft_toRightOf="@+id/button_list"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_search" />
+        app:srcCompat="@android:drawable/ic_menu_search"
+        android:contentDescription="Query Button" />
 
     <ImageButton
         android:id="@+id/button_map"
@@ -45,7 +47,8 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/button_logout"
         app:layout_constraintTop_toBottomOf="@+id/button_list"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
+        app:srcCompat="@android:drawable/ic_dialog_map"
+        android:contentDescription="Map Button" />
 
     <ImageButton
         android:id="@+id/button_logout"
@@ -58,5 +61,6 @@
         app:layout_constraintLeft_toRightOf="@+id/button_map"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_query"
-        app:srcCompat="@android:drawable/ic_lock_idle_lock" />
+        app:srcCompat="@android:drawable/ic_lock_idle_lock"
+        android:contentDescription="Logout Button" />
 </android.support.constraint.ConstraintLayout>

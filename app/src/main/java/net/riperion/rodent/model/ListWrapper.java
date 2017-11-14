@@ -1,5 +1,7 @@
 package net.riperion.rodent.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -8,14 +10,16 @@ import java.util.List;
  */
 
 public class ListWrapper<T> {
-    private List<T> results;
+    private final List<T> results;
+    @SerializedName("count") private final int queryResultCount;
 
     /**
      * Creates a list wrapper instance, for use by the GSON deserializer
      * @param results
      */
-    public ListWrapper(List<T> results) {
+    public ListWrapper(List<T> results, int queryResultCount) {
         this.results = results;
+        this.queryResultCount = queryResultCount;
     }
 
     /**
@@ -25,4 +29,13 @@ public class ListWrapper<T> {
     public List<T> getResults() {
         return results;
     }
+
+    /**
+     * Gets the number of results of the query that returned this wrapped list
+     * @return number of results of query
+     */
+    public int getQueryResultCount() {
+        return queryResultCount;
+    }
+
 }

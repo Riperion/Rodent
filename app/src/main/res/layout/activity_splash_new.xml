@@ -8,7 +8,6 @@
     tools:context="net.riperion.rodent.controller.SplashActivity">
 
     <TextView
-        android:id="@+id/textView3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"

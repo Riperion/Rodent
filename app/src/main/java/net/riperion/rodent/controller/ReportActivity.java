@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,11 +19,9 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
+import net.riperion.rodent.model.RatSightingQuery;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * A login screen that offers login via email/password.
@@ -105,61 +102,75 @@ public class ReportActivity extends AppCompatActivity {
         String latitude = mLatitudeView.getText().toString();
         String longitude = mLongitudeView.getText().toString();
 
-        boolean cancel = false;
-        View focusView = null;
+        showProgress(true);
+        mReportTask = new ReportSightingTask(this, locationType, zipCode, address, city, borough, latitude, longitude);
+        mReportTask.execute((Void) null);
+    }
 
-        if (!RatSighting.validateLocationType(locationType)) {
-            mLocationTypeView.setError("Invalid location type.");
-            focusView = mLocationTypeView;
-            cancel = true;
-        }
+    private void onResponse(boolean status, Exception e) {
+        final ReportActivity thisActivity = this;
+        mReportTask = null;
+        showProgress(false);
 
-        if (!RatSighting.validateZipCode(zipCode)) {
-            mZipCodeView.setError("Invalid zip code.");
-            focusView = mZipCodeView;
-            cancel = true;
-        }
+        if (status) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
 
-        if (!RatSighting.validateAddress(address)) {
-            mAddressView.setError("Invalid address.");
-            focusView = mAddressView;
-            cancel = true;
-        }
+            builder.setMessage("You have successfully filed a report.").setTitle("Success!");
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    thisActivity.onBackPressed();
+                }
+            });
 
-        if (!RatSighting.validateCity(city)) {
-            mCityView.setError("Invalid city.");
-            focusView = mCityView;
-            cancel = true;
-        }
-
-        if (!RatSighting.validateBorough(borough)) {
-            mBoroughView.setError("Invalid borough.");
-            focusView = mBoroughView;
-            cancel = true;
-        }
-
-        if (!RatSighting.validateLatitude(latitude)) {
-            mLatitudeView.setError("Invalid latitude.");
-            focusView = mLatitudeView;
-            cancel = true;
-        }
-
-        if (!RatSighting.validateLongitude(longitude)) {
-            mLongitudeView.setError("Invalid longitude.");
-            focusView = mLongitudeView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
+            AlertDialog dialog = builder.create();
+            dialog.show();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mReportTask = new ReportSightingTask(this, locationType, Integer.parseInt(zipCode), address, city, borough, new BigDecimal(latitude), new BigDecimal(latitude));
-            mReportTask.execute((Void) null);
+            // There has to have been an exception
+            assert e != null;
+
+            if (e instanceof RatSighting.InvalidRatSightingException) {
+                // We handle this by highlighting the appropriate field
+                EditText focusView = null;
+
+                switch (((RatSighting.InvalidRatSightingException) e).getReason()) {
+                    case BAD_LOCATION_TYPE:
+                        focusView = mLocationTypeView;
+                        break;
+                    case BAD_ZIP_CODE:
+                        focusView = mZipCodeView;
+                        break;
+                    case BAD_ADDRESS:
+                        focusView = mAddressView;
+                        break;
+                    case BAD_CITY:
+                        focusView = mCityView;
+                        break;
+                    case BAD_BOROUGH:
+                        focusView = mBoroughView;
+                        break;
+                    case BAD_LATITUDE:
+                        focusView = mLatitudeView;
+                        break;
+                    case BAD_LONGITUDE:
+                        focusView = mLongitudeView;
+                        break;
+                }
+
+                focusView.setError("Invalid input.");
+                focusView.requestFocus();
+            } else {
+                String message = "An unexpected error occurred.";
+
+                if (e instanceof IOException) {
+                    message = "An error occurred while trying to connect to the server.";
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                builder.setMessage(message).setTitle("Oops!");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     }
 
@@ -193,15 +204,17 @@ public class ReportActivity extends AppCompatActivity {
     private class ReportSightingTask extends AsyncTask<Void, Void, Boolean> {
 
         private final ReportActivity mActivity;
-        private String locationType;
-        private int zipCode;
-        private String address;
-        private String city;
-        private String borough;
-        private BigDecimal latitude;
-        private BigDecimal longitude;
+        private final String locationType;
+        private final String zipCode;
+        private final String address;
+        private final String city;
+        private final String borough;
+        private final String latitude;
+        private final String longitude;
 
-        ReportSightingTask(ReportActivity activity, String locationType, int zipCode, String address, String city, String borough, BigDecimal latitude, BigDecimal longitude) {
+        private Exception exception;
+
+        private ReportSightingTask(ReportActivity activity, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
             mActivity = activity;
             this.locationType = locationType;
             this.zipCode = zipCode;
@@ -215,34 +228,16 @@ public class ReportActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                return RatSighting.addRatSighting(locationType, zipCode, address, city, borough, latitude, longitude);
-            } catch (IOException e) {
-                e.printStackTrace(); // TODO: handle this
+                return RatSightingQuery.addRatSighting(locationType, zipCode, address, city, borough, latitude, longitude);
+            } catch (Exception e) {
+                this.exception = e;
                 return false;
             }
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            mReportTask = null;
-            showProgress(false);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-
-            if (success) {
-                builder.setMessage("You have successfully filed a report.").setTitle("Success!");
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        mActivity.onBackPressed();
-                    }
-                });
-            } else {
-                builder.setMessage("Something went wrong, try again.").setTitle("Oops!");
-            }
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            mActivity.onResponse(success, exception);
         }
 
         @Override
