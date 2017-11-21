@@ -25,7 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.ListWrapper;
 import net.riperion.rodent.model.RatSighting;
-import net.riperion.rodent.model.RatSightingQuery;
+import net.riperion.rodent.model.RatSightingProvider;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -83,8 +83,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         // and move the map's camera to the same location.
         this.map = googleMap;
 
-        final MapActivity thisActivity = this;
-
         this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             @Override
@@ -95,16 +93,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public View getInfoContents(Marker marker) {
 
-                LinearLayout info = new LinearLayout(thisActivity);
+                LinearLayout info = new LinearLayout(MapActivity.this);
                 info.setOrientation(LinearLayout.VERTICAL);
 
-                TextView title = new TextView(thisActivity);
+                TextView title = new TextView(MapActivity.this);
                 title.setTextColor(Color.BLACK);
                 title.setGravity(Gravity.CENTER);
                 title.setTypeface(null, Typeface.BOLD);
                 title.setText(marker.getTitle());
 
-                TextView snippet = new TextView(thisActivity);
+                TextView snippet = new TextView(MapActivity.this);
                 snippet.setTextColor(Color.GRAY);
                 snippet.setText(marker.getSnippet());
 
@@ -148,7 +146,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void requestData(Date startDate, Date endDate) {
         if (!this.queryInProgress) {
             this.queryInProgress = true;
-            RatSightingQuery.asyncGetRatSightingByDateRange(startDate, endDate, this);
+            RatSightingProvider.asyncGetRatSightingByDateRange(startDate, endDate, this);
         }
     }
 
@@ -158,7 +156,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         assert body != null;
         List<RatSighting> rats = body.getResults();
 
-        if (rats.size() > 0) {
+        if (!rats.isEmpty()) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (RatSighting rat : rats) {
                 LatLng ratPos = new LatLng(rat.getLatitude().doubleValue(), rat.getLongitude().doubleValue());

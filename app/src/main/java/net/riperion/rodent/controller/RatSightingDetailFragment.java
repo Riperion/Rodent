@@ -3,6 +3,7 @@ package net.riperion.rodent.controller;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,7 +13,7 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
-import net.riperion.rodent.model.RatSightingQuery;
+import net.riperion.rodent.model.RatSightingProvider;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,6 +35,7 @@ public class RatSightingDetailFragment extends Fragment implements Callback<RatS
     /**
      * The dummy content this fragment is presenting.
      */
+    @Nullable
     private RatSighting mItem;
 
     private boolean viewCreated;
@@ -54,7 +56,7 @@ public class RatSightingDetailFragment extends Fragment implements Callback<RatS
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
             mItem = null; // For now!
-            RatSightingQuery.asyncGetRatSightingByKey(getArguments().getInt(ARG_ITEM_ID), this);
+            RatSightingProvider.asyncGetRatSightingByKey(getArguments().getInt(ARG_ITEM_ID), this);
         }
     }
 
@@ -81,6 +83,7 @@ public class RatSightingDetailFragment extends Fragment implements Callback<RatS
             CollapsingToolbarLayout appBarLayout = this.getActivity().findViewById(R.id.toolbar_layout);
 
             if (appBarLayout != null) {
+                assert mItem != null;
                 appBarLayout.setTitle("" + mItem.getId());
             }
 

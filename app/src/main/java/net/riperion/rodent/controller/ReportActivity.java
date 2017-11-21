@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,9 +20,10 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.RatSighting;
-import net.riperion.rodent.model.RatSightingQuery;
+import net.riperion.rodent.model.RatSightingProvider;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * A login screen that offers login via email/password.
@@ -31,6 +33,7 @@ public class ReportActivity extends AppCompatActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
+    @Nullable
     private ReportSightingTask mReportTask = null;
 
     // UI references.
@@ -60,7 +63,7 @@ public class ReportActivity extends AppCompatActivity {
         mLongitudeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.report || id == EditorInfo.IME_NULL) {
+                if ((id == R.id.report) || (id == EditorInfo.IME_NULL)) {
                     attemptReport();
                     return true;
                 }
@@ -103,23 +106,27 @@ public class ReportActivity extends AppCompatActivity {
         String longitude = mLongitudeView.getText().toString();
 
         showProgress(true);
-        mReportTask = new ReportSightingTask(this, locationType, zipCode, address, city, borough, latitude, longitude);
+        mReportTask = new ReportSightingTask(locationType, zipCode, address, city, borough, latitude, longitude);
         mReportTask.execute((Void) null);
     }
 
-    private void onResponse(boolean status, Exception e) {
-        final ReportActivity thisActivity = this;
+    /**
+     * Updates the UI according to the response from the model and the API
+     * @param success whether or not the operation succeeded
+     * @param e if success is false, the exception that was raised (this will not be null then)
+     */
+    private void onReportResult(boolean success, Exception e) {
         mReportTask = null;
         showProgress(false);
 
-        if (status) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+        if (success) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ReportActivity.this);
 
             builder.setMessage("You have successfully filed a report.").setTitle("Success!");
             builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    thisActivity.onBackPressed();
+                    ReportActivity.this.onBackPressed();
                 }
             });
 
@@ -133,31 +140,31 @@ public class ReportActivity extends AppCompatActivity {
                 // We handle this by highlighting the appropriate field
                 EditText focusView = null;
 
-                switch (((RatSighting.InvalidRatSightingException) e).getReason()) {
-                    case BAD_LOCATION_TYPE:
-                        focusView = mLocationTypeView;
-                        break;
-                    case BAD_ZIP_CODE:
-                        focusView = mZipCodeView;
-                        break;
-                    case BAD_ADDRESS:
-                        focusView = mAddressView;
-                        break;
-                    case BAD_CITY:
-                        focusView = mCityView;
-                        break;
-                    case BAD_BOROUGH:
-                        focusView = mBoroughView;
-                        break;
-                    case BAD_LATITUDE:
-                        focusView = mLatitudeView;
-                        break;
-                    case BAD_LONGITUDE:
-                        focusView = mLongitudeView;
-                        break;
+                List<RatSighting.InvalidRatSightingException.InvalidRatSightingReason> reasons = (((RatSighting.InvalidRatSightingException) e).getReasons());
+                if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LOCATION_TYPE)) {
+                    focusView = mLocationTypeView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_ZIP_CODE)) {
+                    focusView = mZipCodeView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_ADDRESS)) {
+                    focusView = mAddressView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_CITY)) {
+                    focusView = mCityView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_BOROUGH)) {
+                    focusView = mBoroughView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LATITUDE)) {
+                    focusView = mLatitudeView;
+                    focusView.setError("Invalid input.");
+                } if (reasons.contains(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LONGITUDE)) {
+                    focusView = mLongitudeView;
+                    focusView.setError("Invalid input.");
                 }
 
-                focusView.setError("Invalid input.");
+                assert focusView != null;
                 focusView.requestFocus();
             } else {
                 String message = "An unexpected error occurred.";
@@ -166,7 +173,7 @@ public class ReportActivity extends AppCompatActivity {
                     message = "An error occurred while trying to connect to the server.";
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ReportActivity.this);
                 builder.setMessage(message).setTitle("Oops!");
                 AlertDialog dialog = builder.create();
                 dialog.show();
@@ -201,9 +208,11 @@ public class ReportActivity extends AppCompatActivity {
         });
     }
 
-    private class ReportSightingTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final ReportActivity mActivity;
+    /**
+     * Represents an asynchronous task that calls synchronous model functions in order to add
+     * a new Rat Sighting Report to the database.
+     */
+    private final class ReportSightingTask extends AsyncTask<Void, Void, Boolean> {
         private final String locationType;
         private final String zipCode;
         private final String address;
@@ -214,8 +223,17 @@ public class ReportActivity extends AppCompatActivity {
 
         private Exception exception;
 
-        private ReportSightingTask(ReportActivity activity, String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
-            mActivity = activity;
+        /**
+         * Instantiate a ReportSightingTask to process a new Rat Sighting Report
+         * @param locationType the location type for this sighting
+         * @param zipCode the zip code of the location
+         * @param address the address of the location
+         * @param city the city the sighting was in
+         * @param borough the borough the sighting was in
+         * @param latitude the latitude of the location of the sighting
+         * @param longitude the latitude of the location of the sighting
+         */
+        private ReportSightingTask(String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) {
             this.locationType = locationType;
             this.zipCode = zipCode;
             this.address = address;
@@ -228,7 +246,7 @@ public class ReportActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                return RatSightingQuery.addRatSighting(locationType, zipCode, address, city, borough, latitude, longitude);
+                return RatSightingProvider.addRatSighting(locationType, zipCode, address, city, borough, latitude, longitude);
             } catch (Exception e) {
                 this.exception = e;
                 return false;
@@ -237,7 +255,7 @@ public class ReportActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            mActivity.onResponse(success, exception);
+            onReportResult(success, exception);
         }
 
         @Override

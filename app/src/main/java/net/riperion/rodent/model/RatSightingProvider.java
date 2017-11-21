@@ -14,11 +14,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * This class contains a library of static methods that are used to obtain Rat Sighting objects.
- * It bridges the Retrofit API handler and the activities that depend on data from the API.
+ * This class contains a library of static methods that are used to communicate with the API about Rat Sighting objects.
+ * It bridges the Retrofit API handler and the activities that depend on the API.
  */
 
-public class RatSightingQuery {
+public class RatSightingProvider {
     /**
      * Synchronously fetch an unfiltered list of rat sightings from the API
      * @param offset the offset to paginate from
@@ -26,7 +26,7 @@ public class RatSightingQuery {
      * @throws IOException any errors that might result from the API call
      */
     public static List<RatSighting> getRatSightings(int offset) throws IOException {
-        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(User.getAuthToken().getAuthorization(), offset);
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(UserProvider.getAuthToken().getAuthorization(), offset);
         Response<ListWrapper<RatSighting>> response = call.execute();
 
         ListWrapper<RatSighting> body = response.body();
@@ -40,7 +40,7 @@ public class RatSightingQuery {
      * @param offset the offset to paginate from
      */
     public static void asyncGetRatSightings(Callback<ListWrapper<RatSighting>> callback, Integer offset) {
-        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(User.getAuthToken().getAuthorization(), offset);
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightings(UserProvider.getAuthToken().getAuthorization(), offset);
         call.enqueue(callback);
     }
 
@@ -51,7 +51,7 @@ public class RatSightingQuery {
      * @throws IOException any errors that might result from the API call
      */
     public static RatSighting getRatSightingByKey(int id) throws IOException {
-        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(User.getAuthToken().getAuthorization(), id);
+        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(UserProvider.getAuthToken().getAuthorization(), id);
         Response<RatSighting> response = call.execute();
 
         return response.body();
@@ -63,7 +63,7 @@ public class RatSightingQuery {
      * @param callback class that will be called as the callback once values are returned
      */
     public static void asyncGetRatSightingByKey(int id, Callback<RatSighting> callback) {
-        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(User.getAuthToken().getAuthorization(), id);
+        Call<RatSighting> call = RodentApp.getApi().getRatSightingById(UserProvider.getAuthToken().getAuthorization(), id);
         call.enqueue(callback);
     }
 
@@ -76,7 +76,7 @@ public class RatSightingQuery {
     public static void asyncGetRatSightingByDateRange(Date startDate, Date endDate, Callback<ListWrapper<RatSighting>> callback) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightingsByDateRange(User.getAuthToken().getAuthorization(), 0, dateFormat.format(startDate), dateFormat.format(endDate));
+        Call<ListWrapper<RatSighting>> call = RodentApp.getApi().getRatSightingsByDateRange(UserProvider.getAuthToken().getAuthorization(), 0, dateFormat.format(startDate), dateFormat.format(endDate));
         call.enqueue(callback);
     }
 
@@ -95,33 +95,14 @@ public class RatSightingQuery {
      */
     public static boolean addRatSighting(String locationType, String zipCode, String address, String city, String borough, String latitude, String longitude) throws IOException, RatSighting.InvalidRatSightingException {
         // Run the validations
-        if (!RatSighting.validateLocationType(locationType))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LOCATION_TYPE);
-
-        if (!RatSighting.validateZipCode(zipCode))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_ZIP_CODE);
-
-        if (!RatSighting.validateAddress(address))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_ADDRESS);
-
-        if (!RatSighting.validateCity(city))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_CITY);
-
-        if (!RatSighting.validateBorough(borough))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_BOROUGH);
-
-        if (!RatSighting.validateLatitude(latitude))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LATITUDE);
-
-        if (!RatSighting.validateLongitude(longitude))
-            throw new RatSighting.InvalidRatSightingException(RatSighting.InvalidRatSightingException.InvalidRatSightingReason.BAD_LONGITUDE);
+        RatSighting.validateRatSightingDetails(locationType, zipCode, address, city, borough, latitude, longitude);
 
         // Get the correct data types
         int parsedZipCode = Integer.parseInt(zipCode);
         BigDecimal parsedLatitude = new BigDecimal(latitude);
         BigDecimal parsedLongitude = new BigDecimal(longitude);
 
-        Call<Void> call = RodentApp.getApi().addRatSighting(User.getAuthToken().getAuthorization(), locationType, parsedZipCode, address, city, borough, parsedLatitude, parsedLongitude);
+        Call<Void> call = RodentApp.getApi().addRatSighting(UserProvider.getAuthToken().getAuthorization(), locationType, parsedZipCode, address, city, borough, parsedLatitude, parsedLongitude);
         Response<Void> request = call.execute();
 
         return request.isSuccessful();
@@ -132,7 +113,7 @@ public class RatSightingQuery {
      * @param callback class that will be called as the callback once values are returned
      */
     public static void asyncGetMonthlyRatSightingCountByMonth(Callback<List<DateCountPair>> callback) {
-        Call<List<DateCountPair>> call = RodentApp.getApi().getRatSightingsMonthlyStats(User.getAuthToken().getAuthorization());
+        Call<List<DateCountPair>> call = RodentApp.getApi().getRatSightingsMonthlyStats(UserProvider.getAuthToken().getAuthorization());
         call.enqueue(callback);
     }
 }

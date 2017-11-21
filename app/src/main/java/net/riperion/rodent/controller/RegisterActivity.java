@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,8 +22,10 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.User;
+import net.riperion.rodent.model.UserProvider;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * A login screen that offers login via email/password.
@@ -31,6 +34,7 @@ public class RegisterActivity extends AppCompatActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
+    @Nullable
     private UserRegisterTask mRegisterTask = null;
 
     // UI references.
@@ -50,7 +54,7 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.register || id == EditorInfo.IME_NULL) {
+                if ((id == R.id.register) || (id == EditorInfo.IME_NULL)) {
                     attemptRegister();
                     return true;
                 }
@@ -95,10 +99,14 @@ public class RegisterActivity extends AppCompatActivity {
         mRegisterTask.execute((Void) null);
     }
 
-    private void onPostRegister(boolean success, Exception e) {
+    /**
+     * Updates the UI according to the response from the model and the API
+     * @param success whether or not the operation succeeded
+     * @param e if status is false, the exception that was raised (this will not be null then)
+     */
+    private void onRegisterResult(boolean success, Exception e) {
         mRegisterTask = null;
         showProgress(false);
-        final RegisterActivity thisActivity = this;
 
         if (success) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -107,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
             builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    Intent intent = new Intent(thisActivity, SplashActivity.class);
+                    Intent intent = new Intent(RegisterActivity.this, SplashActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
@@ -122,17 +130,18 @@ public class RegisterActivity extends AppCompatActivity {
             if (e instanceof User.InvalidUserException) {
                 // We handle this by highlighting the appropriate field
                 EditText focusView = null;
+                List<User.InvalidUserException.InvalidUserReason> reasons = ((User.InvalidUserException) e).getReasons();
 
-                switch (((User.InvalidUserException) e).getReason()) {
-                    case BAD_USERNAME:
-                        focusView = mUsernameView;
-                        break;
-                    case BAD_PASSWORD:
-                        focusView = mPasswordView;
-                        break;
+                if (reasons.contains(User.InvalidUserException.InvalidUserReason.BAD_USERNAME)) {
+                    mUsernameView.setError("Invalid username.");
+                    focusView = mUsernameView;
+                }
+                if (reasons.contains(User.InvalidUserException.InvalidUserReason.BAD_USERNAME)) {
+                    mPasswordView.setError("Invalid password.");
+                    focusView = mPasswordView;
                 }
 
-                focusView.setError("Invalid input.");
+                assert focusView != null;
                 focusView.requestFocus();
             } else {
                 String message = "An unexpected error occurred.";
@@ -141,7 +150,7 @@ public class RegisterActivity extends AppCompatActivity {
                     message = "An error occurred while trying to connect to the server.";
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
                 builder.setMessage(message).setTitle("Oops!");
                 AlertDialog dialog = builder.create();
                 dialog.show();
@@ -180,7 +189,7 @@ public class RegisterActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    private class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+    private final class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mUsername;
         private final String mPassword;
@@ -199,7 +208,7 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                return User.addUser(mUsername, mPassword);
+                return UserProvider.addUser(mUsername, mPassword);
             } catch (Exception e) {
                 this.exception = e;
             }
@@ -209,7 +218,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            onPostRegister(success, this.exception);
+            onRegisterResult(success, this.exception);
         }
 
         @Override

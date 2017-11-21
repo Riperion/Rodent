@@ -18,7 +18,8 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.DateCountPair;
-import net.riperion.rodent.model.RatSightingQuery;
+import net.riperion.rodent.model.DateFloatSerializer;
+import net.riperion.rodent.model.RatSightingProvider;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -36,6 +37,8 @@ import retrofit2.Response;
  * This activity is the controller for the view that hosts the Map view of the sightings.
  */
 public class GraphActivity extends AppCompatActivity implements Callback<List<DateCountPair>> {
+    private static final int MAXIMUM_VISIBLE_VALUE_COUNT = 50;
+
     private BarChart chart;
 
     private EditText startDateEdit;
@@ -78,7 +81,7 @@ public class GraphActivity extends AppCompatActivity implements Callback<List<Da
 
         // if more than 60 entries are displayed in the chart, no values will be
         // drawn
-        chart.setMaxVisibleValueCount(50);
+        chart.setMaxVisibleValueCount(MAXIMUM_VISIBLE_VALUE_COUNT);
 
         // Disable all zooming
         chart.setPinchZoom(false);
@@ -107,7 +110,7 @@ public class GraphActivity extends AppCompatActivity implements Callback<List<Da
         chart.getAxisRight().setEnabled(false);
 
         this.queryInProgress = true;
-        RatSightingQuery.asyncGetMonthlyRatSightingCountByMonth(this);
+        RatSightingProvider.asyncGetMonthlyRatSightingCountByMonth(this);
     }
 
     /**
@@ -140,8 +143,8 @@ public class GraphActivity extends AppCompatActivity implements Callback<List<Da
      */
     private void displayData() {
         if (!this.queryInProgress) {
-            float start = DateCountPair.getFloatFromDate(startDate);
-            float diff = DateCountPair.getFloatFromDate(endDate) - start;
+            float start = DateFloatSerializer.getFloatFromDate(startDate);
+            float diff = DateFloatSerializer.getFloatFromDate(endDate) - start;
             chart.fitScreen();
             chart.setVisibleXRange(diff, diff);
             chart.moveViewToX(start);
@@ -156,7 +159,7 @@ public class GraphActivity extends AppCompatActivity implements Callback<List<Da
 
         List<BarEntry> entries = new ArrayList<>();
         for (DateCountPair d: items) {
-            entries.add(new BarEntry(DateCountPair.getFloatFromDate(d.getMonth()), d.getCount()));
+            entries.add(new BarEntry(DateFloatSerializer.getFloatFromDate(d.getMonth()), d.getCount()));
         }
 
         BarDataSet set = new BarDataSet(entries, "BarDataSet");
@@ -179,11 +182,13 @@ public class GraphActivity extends AppCompatActivity implements Callback<List<Da
         this.queryInProgress = false;
     }
 
+    /**
+     * An axis label formatter class that uses the Date deserializer to get a date string for the X-axis.
+     */
     private class MonthAxisValueFormatter implements IAxisValueFormatter {
-
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
-            return DateCountPair.getDateFromFloat(value);
+            return DateFloatSerializer.getDateStringFromFloat(value);
         }
     }
 }

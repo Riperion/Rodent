@@ -17,7 +17,7 @@ import android.widget.TextView;
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.ListWrapper;
 import net.riperion.rodent.model.RatSighting;
-import net.riperion.rodent.model.RatSightingQuery;
+import net.riperion.rodent.model.RatSightingProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,12 +55,11 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        final RatSightingListActivity thisActivity = this;
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(thisActivity, ReportActivity.class);
+                Intent intent = new Intent(RatSightingListActivity.this, ReportActivity.class);
                 startActivity(intent);
             }
         });
@@ -94,20 +93,27 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
     @Override
     protected void onResume() {
         super.onResume();
-        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.clear();
+        ((RatSightingRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.clear();
         getMoreRatSightings();
     }
 
+    /**
+     * Sets up the recycler view and requests for data to populate it with
+     * @param recyclerView the recycler view to set the adapter on
+     */
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        SimpleItemRecyclerViewAdapter adapter = new SimpleItemRecyclerViewAdapter(new ArrayList<RatSighting>());
+        RatSightingRecyclerViewAdapter adapter = new RatSightingRecyclerViewAdapter(new ArrayList<RatSighting>());
         recyclerView.setAdapter(adapter);
         getMoreRatSightings();
     }
 
+    /**
+     * Queries the server for more Rat Sightings to populate the list with
+     */
     private void getMoreRatSightings() {
         if (!requestPresent) {
-            int size = ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.size();
-            RatSightingQuery.asyncGetRatSightings(this, size);
+            int size = ((RatSightingRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.size();
+            RatSightingProvider.asyncGetRatSightings(this, size);
             requestPresent = true;
         }
     }
@@ -116,7 +122,7 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
     public void onResponse(@NonNull Call<ListWrapper<RatSighting>> call, @NonNull Response<ListWrapper<RatSighting>> response) {
         ListWrapper<RatSighting> body = response.body();
         assert body != null;
-        ((SimpleItemRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.addAll(body.getResults());
+        ((RatSightingRecyclerViewAdapter) mRecyclerView.getAdapter()).mValues.addAll(body.getResults());
         mRecyclerView.getAdapter().notifyDataSetChanged();
 
         requestPresent = false;
@@ -132,12 +138,19 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
         dialog.show();
     }
 
-    public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+    /**
+     * An adapter class that populates recycler view cells with corresponding Rat Sightings
+     */
+    public class RatSightingRecyclerViewAdapter
+            extends RecyclerView.Adapter<RatSightingRecyclerViewAdapter.ViewHolder> {
 
         private final List<RatSighting> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<RatSighting> items) {
+        /**
+         * Instantiates an adapter to use on a RecyclerView
+         * @param items the list of items to populate this RecyclerView with
+         */
+        public RatSightingRecyclerViewAdapter(List<RatSighting> items) {
             mValues = items;
         }
 
@@ -185,12 +198,16 @@ public class RatSightingListActivity extends AppCompatActivity implements Callba
          * Represents individual cell in the recycler view holding the rat sighting's ID and Address
          */
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mIdView;
-            public final TextView mContentView;
-            public RatSighting mItem;
+            final View mView;
+            final TextView mIdView;
+            final TextView mContentView;
+            RatSighting mItem;
 
-            public ViewHolder(View view) {
+            /**
+             * Instantiates a view holder - this is done by the Android UI backend
+             * @param view the view this holder is linked to
+             */
+            ViewHolder(View view) {
                 super(view);
                 mView = view;
                 mIdView = view.findViewById(R.id.id);

@@ -18,12 +18,13 @@ import retrofit2.http.Query;
  * It is used by the Retrofit library to generate a callable API object.
  */
 
+@SuppressWarnings("JavaDoc")
 public interface RodentAPI {
     @POST("/api/auth/users/create/")
-    Call<Void> createUser(@Body User.UserWrapper userWrapper);
+    Call<Void> createUser(@Body UserProvider.UserCredentialWrapper userCredentialWrapper);
 
     @POST("/api/auth/token/create/")
-    Call<AuthToken> login(@Body User.UserWrapper userWrapper);
+    Call<AuthToken> login(@Body UserProvider.UserCredentialWrapper userCredentialWrapper);
 
     @POST("/api/auth/token/destroy/")
     Call<Void> logout(@Header("Authorization") String authorization);

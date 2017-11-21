@@ -1,115 +1,80 @@
 package net.riperion.rodent.model;
 
-import android.text.TextUtils;
-
-import net.riperion.rodent.RodentApp;
-
-import java.io.IOException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents statically the User that is currently authenticated on the application.
  */
 
 public class User {
-    public static boolean validateUsername(String username) {
-        return !TextUtils.isEmpty(username);
-    }
-
-    public static boolean validatePassword(String password) {
-        return !TextUtils.isEmpty(password);
-    }
-
-    private static String currentUsername;
-    private static AuthToken authToken;
-
     /**
-     * Creates a new user instance and adds it to the user database
-     *
-     * @param username the username of the user to add
-     * @param password the password of the user to add
-     * @return whether or not the user was added successful
-     * @throws InvalidUserException if the username or password is invalid
-     * @throws IOException if an error occurs while trying to connect to the API
+     * Validates a set of User detail input against requirements for the fields.
+     * @param username the username to validate
+     * @param password the password to validate
+     * @throws InvalidUserException an exception containing validation error reasons if validation fails
      */
-    public static boolean addUser(String username, String password) throws IOException, InvalidUserException {
-        if (!validateUsername(username))
-            throw new InvalidUserException(InvalidUserException.InvalidUserReason.BAD_USERNAME);
-
-        if (!validatePassword(password))
-            throw new InvalidUserException(InvalidUserException.InvalidUserReason.BAD_PASSWORD);
-
-        Call<Void> call = RodentApp.getApi().createUser(new UserWrapper(username, password));
-        Response<Void> response = call.execute();
-
-        return response.isSuccessful();
-    }
-
-    /**
-     * Authenticates a user by validating username/password and setting currentUser singleton
-     * @param username the username of the user to authenticate
-     * @param password the password the user is trying to log in with
-     * @return whether or not the login was successful
-     * @throws IOException if an error occurs while trying to connect to the API
-     */
-    public static boolean authenticateUser(String username, String password) throws IOException {
-        Call<AuthToken> call = RodentApp.getApi().login(new UserWrapper(username, password));
-        Response<AuthToken> response = call.execute();
-
-        if (response.code() < 400) {
-            authToken = response.body();
-            currentUsername = username;
-            return true;
+    public static void validateUserDetails(String username, String password) throws InvalidUserException {
+        List<InvalidUserException.InvalidUserReason> reasons = new ArrayList<>();
+        if (!validateUsername(username)) {
+            reasons.add(InvalidUserException.InvalidUserReason.BAD_USERNAME);
+        }
+        if (!validatePassword(password)) {
+            reasons.add(InvalidUserException.InvalidUserReason.BAD_PASSWORD);
         }
 
-        return false;
-    }
-
-    public static void logoutUser(Callback<Void> cb) {
-        Call<Void> call = RodentApp.getApi().logout(authToken.getAuthorization());
-        call.enqueue(cb);
-    }
-
-    /**
-     * Get the currently logged in user's username
-     * @return String containing the user's username
-     */
-    public static String getCurrentUsername() {
-        return currentUsername;
-    }
-
-    public static AuthToken getAuthToken() {
-        return authToken;
-    }
-
-    static class UserWrapper {
-        public final String username;
-        public final String password;
-
-        public UserWrapper(String username, String password) {
-            this.username = username;
-            this.password = password;
+        if (!reasons.isEmpty()) {
+            throw new InvalidUserException(reasons);
         }
     }
 
+    /**
+     * Validates a given username input
+     * @param username the username input to validate
+     * @return whether or not the input is valid
+     */
+    private static boolean validateUsername(String username) {
+        return username.length() >= 8;
+    }
+
+    /**
+     * Validates a given password input
+     * @param password the password input to validate
+     * @return whether or not the input is valid
+     */
+    private static boolean validatePassword(String password) {
+        return (password.length() >= 8) && // Not too short
+                        !password.toUpperCase().equals(password) && // Not all uppercase
+                        !password.toLowerCase().equals(password) && // Not all lowercase
+                        password.matches(".*\\d+.*"); // Contains at least one digit
+    }
+
+    /**
+     * Exception to be thrown by validator in case an user validation exception occurs
+     */
     public static class InvalidUserException extends Exception {
         public enum InvalidUserReason {
             BAD_USERNAME,
             BAD_PASSWORD
         }
 
-        private final InvalidUserReason reason;
+        private final List<InvalidUserReason> reasons;
 
-        public InvalidUserException(InvalidUserReason reason) {
-            super(reason.name());
-            this.reason = reason;
+        /**
+         * Constructs an instance of the exception to be thrown when User detail validation fails.
+         * @param reasons the reasons of the failure of the validation
+         */
+        public InvalidUserException(List<InvalidUserReason> reasons) {
+            super("Invalid user input.");
+            this.reasons = new ArrayList<>(reasons);
         }
 
-        public InvalidUserReason getReason() {
-            return reason;
+        /**
+         * Gets the reasons of the invalidity of the User details input
+         * @return a list of reasons of invalidity
+         */
+        public List<InvalidUserReason> getReasons() {
+            return reasons;
         }
     }
 }

@@ -8,7 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import net.riperion.rodent.R;
-import net.riperion.rodent.model.User;
+import net.riperion.rodent.model.UserProvider;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,7 +31,7 @@ public class ApplicationActivity extends AppCompatActivity implements Callback<V
      * @param view The button that is pressed on
      */
     public void onLogoutPressed(@SuppressWarnings("UnusedParameters") View view) {
-        User.logoutUser(this);
+        UserProvider.logoutUser(this);
     }
 
     /**

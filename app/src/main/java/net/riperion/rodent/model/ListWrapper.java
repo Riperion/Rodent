@@ -15,7 +15,8 @@ public class ListWrapper<T> {
 
     /**
      * Creates a list wrapper instance, for use by the GSON deserializer
-     * @param results
+     * @param results the results returned by the API
+     * @param queryResultCount the count of overall results that can be accessed through pagination
      */
     public ListWrapper(List<T> results, int queryResultCount) {
         this.results = results;

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,8 +20,10 @@ import android.widget.TextView;
 
 import net.riperion.rodent.R;
 import net.riperion.rodent.model.User;
+import net.riperion.rodent.model.UserProvider;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * A login screen that offers login via email/password.
@@ -29,6 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
+    @Nullable
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -48,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if ((id == R.id.login) || (id == EditorInfo.IME_NULL)) {
                     attemptLogin();
                     return true;
                 }
@@ -90,27 +94,31 @@ public class LoginActivity extends AppCompatActivity {
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!User.validatePassword(password)) {
-            mPasswordView.setError("Invalid password.");
-            focusView = mPasswordView;
+        try {
+            User.validateUserDetails(username, password);
+        } catch (User.InvalidUserException e) {
             cancel = true;
-        }
-
-        if (!User.validateUsername(username)) {
-            mUsernameView.setError("This field cannot be blank.");
-            focusView = mUsernameView;
-            cancel = true;
+            List<User.InvalidUserException.InvalidUserReason> reasons = e.getReasons();
+            if (reasons.contains(User.InvalidUserException.InvalidUserReason.BAD_USERNAME)) {
+                mUsernameView.setError("Invalid username.");
+                focusView = mUsernameView;
+            }
+            if (reasons.contains(User.InvalidUserException.InvalidUserReason.BAD_USERNAME)) {
+                mPasswordView.setError("Invalid password.");
+                focusView = mPasswordView;
+            }
         }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
+            assert focusView != null;
             focusView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(this, username, password);
+            mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -148,19 +156,16 @@ public class LoginActivity extends AppCompatActivity {
      */
     private class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final LoginActivity mActivity;
         private final String mUsername;
         private final String mPassword;
 
         /**
          * Construct a new login task instance
          *
-         * @param activity The activity that hosts the progress bar etc.
          * @param username The username we're trying to log in with
          * @param password The password we're trying to log in with
          */
-        UserLoginTask(LoginActivity activity, String username, String password) {
-            mActivity = activity;
+        UserLoginTask(String username, String password) {
             mUsername = username;
             mPassword = password;
         }
@@ -168,7 +173,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                return User.authenticateUser(mUsername, mPassword);
+                return UserProvider.authenticateUser(mUsername, mPassword);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -181,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                Intent intent = new Intent(mActivity, ApplicationActivity.class);
+                Intent intent = new Intent(LoginActivity.this, ApplicationActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             } else {
