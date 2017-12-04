@@ -8,13 +8,19 @@
 
 import UIKit
 
+// Not in the keychain, RIP. This is a simple class project written in a day.
+let AUTH_TOKEN_KEY = "net.riperion.rodent.authtoken"
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        if let authTokenString = UserDefaults.standard.string(forKey: AUTH_TOKEN_KEY) {
+            let authToken = AuthToken(token: authTokenString)
+            API.sharedInstance.authToken = authToken
+        }
+        
         return true
     }
 

@@ -9,7 +9,6 @@
 import UIKit
 
 class LoginTableViewController: UITableViewController {
-
     @IBOutlet weak var emailField: UITextField!
     @IBOutlet weak var passwordField: UITextField!
     
@@ -48,8 +47,9 @@ class LoginTableViewController: UITableViewController {
             
             let user = User(username: email, password: password)
             
-            API().authenticate(user: user) { authToken in
-                if let _ = authToken {
+            API.sharedInstance.authenticate(user: user) { token in
+                if let token = token {
+                    UserDefaults.standard.set(token.token, forKey: AUTH_TOKEN_KEY)
                     self.dismiss(animated: true, completion: nil)
                 }
             }

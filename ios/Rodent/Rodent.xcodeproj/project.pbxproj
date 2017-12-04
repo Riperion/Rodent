@@ -12,6 +12,10 @@
 		4119B3751FC9473700B44060 /* AppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4119B3741FC9473700B44060 /* AppViewController.swift */; };
 		4129EA3D1FCA01D600D65896 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4129EA3C1FCA01D600D65896 /* API.swift */; };
 		4129EA401FCA01F200D65896 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4129EA3F1FCA01F200D65896 /* Model.swift */; };
+		41C61E7B1FD5B44F004CEA43 /* SightingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */; };
+		41C61E7E1FD5B5A6004CEA43 /* RatSightingTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */; };
+		41C61E801FD5CF4A004CEA43 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */; };
+		41C61E821FD5EE64004CEA43 /* AddRatSightingTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E811FD5EE64004CEA43 /* AddRatSightingTableViewController.swift */; };
 		41EA8C781FAA3C9A003EEC6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EA8C771FAA3C9A003EEC6C /* AppDelegate.swift */; };
 		41EA8C7D1FAA3C9A003EEC6C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 41EA8C7B1FAA3C9A003EEC6C /* Main.storyboard */; };
 		41EA8C7F1FAA3C9A003EEC6C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41EA8C7E1FAA3C9A003EEC6C /* Assets.xcassets */; };
@@ -25,6 +29,10 @@
 		4119B3741FC9473700B44060 /* AppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewController.swift; sourceTree = "<group>"; };
 		4129EA3C1FCA01D600D65896 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		4129EA3F1FCA01F200D65896 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SightingTableViewCell.swift; sourceTree = "<group>"; };
+		41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatSightingTableViewController.swift; sourceTree = "<group>"; };
+		41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		41C61E811FD5EE64004CEA43 /* AddRatSightingTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRatSightingTableViewController.swift; sourceTree = "<group>"; };
 		41EA8C741FAA3C9A003EEC6C /* Rodent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rodent.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		41EA8C771FAA3C9A003EEC6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		41EA8C7C1FAA3C9A003EEC6C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -51,8 +59,11 @@
 		4119B3711FC93FA200B44060 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				4119B3741FC9473700B44060 /* AppViewController.swift */,
 				4119B36F1FC93F9A00B44060 /* LoginTableViewController.swift */,
+				4119B3741FC9473700B44060 /* AppViewController.swift */,
+				41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */,
+				41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */,
+				41C61E811FD5EE64004CEA43 /* AddRatSightingTableViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -64,6 +75,14 @@
 				4129EA3F1FCA01F200D65896 /* Model.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		41C61E7C1FD5B453004CEA43 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */,
+			);
+			name = View;
 			sourceTree = "<group>";
 		};
 		41EA8C6B1FAA3C9A003EEC6C = {
@@ -91,6 +110,7 @@
 				4119B3721FC9465C00B44060 /* Constants.swift */,
 				41EA8C7B1FAA3C9A003EEC6C /* Main.storyboard */,
 				4119B3711FC93FA200B44060 /* View Controllers */,
+				41C61E7C1FD5B453004CEA43 /* View */,
 				4129EA3E1FCA01DC00D65896 /* Model */,
 				41EA8C7E1FAA3C9A003EEC6C /* Assets.xcassets */,
 				41EA8C801FAA3C9A003EEC6C /* LaunchScreen.storyboard */,
@@ -247,6 +267,10 @@
 			files = (
 				41EA8C781FAA3C9A003EEC6C /* AppDelegate.swift in Sources */,
 				4119B3701FC93F9A00B44060 /* LoginTableViewController.swift in Sources */,
+				41C61E821FD5EE64004CEA43 /* AddRatSightingTableViewController.swift in Sources */,
+				41C61E7E1FD5B5A6004CEA43 /* RatSightingTableViewController.swift in Sources */,
+				41C61E7B1FD5B44F004CEA43 /* SightingTableViewCell.swift in Sources */,
+				41C61E801FD5CF4A004CEA43 /* MapViewController.swift in Sources */,
 				4119B3751FC9473700B44060 /* AppViewController.swift in Sources */,
 				4129EA401FCA01F200D65896 /* Model.swift in Sources */,
 				4119B3731FC9465C00B44060 /* Constants.swift in Sources */,
