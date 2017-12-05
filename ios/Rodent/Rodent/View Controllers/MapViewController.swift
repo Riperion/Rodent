@@ -44,7 +44,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // MARK: - Map View Delegate
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        let sightingPin = view.annotation as! SightingPin
+        guard let sightingPin = view.annotation as? SightingPin else { return }
         
         let detailViewController = self.storyboard?.instantiateViewController(withIdentifier: SIGHTING_DETAIL_STORYBOARD_ID) as! RatSightingDetailViewController
         detailViewController.loadSighting(sighting: sightingPin.sighting)
