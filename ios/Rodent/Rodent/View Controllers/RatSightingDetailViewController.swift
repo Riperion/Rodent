@@ -46,7 +46,6 @@ class RatSightingDetailViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
 
     public func loadSighting(sighting: Sighting) {
         self.sighting = sighting

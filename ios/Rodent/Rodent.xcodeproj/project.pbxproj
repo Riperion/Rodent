@@ -14,6 +14,7 @@
 		4129EA401FCA01F200D65896 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4129EA3F1FCA01F200D65896 /* Model.swift */; };
 		415290481FD6392F008DDCEF /* RatSightingDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415290471FD6392F008DDCEF /* RatSightingDetailViewController.swift */; };
 		4152904A1FD63D55008DDCEF /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415290491FD63D55008DDCEF /* NavigationController.swift */; };
+		4152904C1FD6450C008DDCEF /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4152904B1FD6450C008DDCEF /* MapKit.framework */; };
 		41C61E7B1FD5B44F004CEA43 /* SightingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */; };
 		41C61E7E1FD5B5A6004CEA43 /* RatSightingTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */; };
 		41C61E801FD5CF4A004CEA43 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */; };
@@ -33,6 +34,7 @@
 		4129EA3F1FCA01F200D65896 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		415290471FD6392F008DDCEF /* RatSightingDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatSightingDetailViewController.swift; sourceTree = "<group>"; };
 		415290491FD63D55008DDCEF /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
+		4152904B1FD6450C008DDCEF /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SightingTableViewCell.swift; sourceTree = "<group>"; };
 		41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatSightingTableViewController.swift; sourceTree = "<group>"; };
 		41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4152904C1FD6450C008DDCEF /* MapKit.framework in Frameworks */,
 				633E85F447F74F7E6672958C /* Pods_Rodent.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -128,6 +131,7 @@
 		5F8F347075BB8CAD998D6526 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4152904B1FD6450C008DDCEF /* MapKit.framework */,
 				4700690C270FDFB83E542BE2 /* Pods_Rodent.framework */,
 			);
 			name = Frameworks;
@@ -178,6 +182,11 @@
 					41EA8C731FAA3C9A003EEC6C = {
 						CreatedOnToolsVersion = 9.1;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Maps.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};

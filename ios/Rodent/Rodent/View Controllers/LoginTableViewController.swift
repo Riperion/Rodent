@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 class LoginTableViewController: UITableViewController {
     @IBOutlet weak var emailField: UITextField!
@@ -23,6 +24,11 @@ class LoginTableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        let locationManager = CLLocationManager()
+        locationManager.requestWhenInUseAuthorization()
     }
     
     // MARK: - Functionality

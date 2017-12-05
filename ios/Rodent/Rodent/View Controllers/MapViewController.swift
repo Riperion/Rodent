@@ -28,7 +28,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         self.updateSightings()
     }
-
+    
     func updateSightings() {
         API.sharedInstance.getSightings(API.Pagination(offset: 0, limit: NUMBER_PINS)) {
             sightings in

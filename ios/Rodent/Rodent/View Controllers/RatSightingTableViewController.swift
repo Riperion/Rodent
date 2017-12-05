@@ -62,6 +62,7 @@ class RatSightingTableViewController: UITableViewController {
     
     @IBAction func logout(_ sender: Any) {
         API.sharedInstance.logout()
+        UserDefaults.standard.removeObject(forKey: AUTH_TOKEN_KEY)
         NotificationCenter.default.post(Notification(name: AUTH_CHANGE_NOTIFICATION))
     }
     
