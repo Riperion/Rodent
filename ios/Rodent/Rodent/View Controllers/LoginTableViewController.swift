@@ -30,33 +30,38 @@ class LoginTableViewController: UITableViewController {
         return email?.count != 0 && password?.count != 0
     }
     
+    func loginWithUser(user: User) {
+        API.sharedInstance.authenticate(user: user) { token in
+            if let token = token {
+                UserDefaults.standard.set(token.token, forKey: AUTH_TOKEN_KEY)
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
+        return indexPath.section != 0
+    }
+    
     // MARK: - Table View Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let email = emailField.text
-        let password = passwordField.text
+        guard let email = emailField.text, let password = passwordField.text else { return }
+        if !validateFields(email: email, password: password) {
+            return
+        }
+        
+        let user = User(username: email, password: password)
         
         switch indexPath {
         case LOGIN_BUTTON_INDEX_PATH:
-            if !validateFields(email: email, password: password) {
-                break
-            }
-            
-            guard let email = email, let password = password else {
-                return
-            }
-            
-            let user = User(username: email, password: password)
-            
-            API.sharedInstance.authenticate(user: user) { token in
-                if let token = token {
-                    UserDefaults.standard.set(token.token, forKey: AUTH_TOKEN_KEY)
-                    self.dismiss(animated: true, completion: nil)
-                }
-            }
-
+            loginWithUser(user: user)
             break
         case REGISTER_BUTTON_INDEX_PATH:
-            print("Clicked register.")
+            API.sharedInstance.register(user: user) { user in
+                if let user = user {
+                    self.loginWithUser(user: user)
+                }
+            }
             break
         default:
             // Do nothing

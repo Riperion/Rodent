@@ -30,7 +30,7 @@ public struct AuthToken: Decodable {
     }
 }
 
-let AUTHENTICATION_CHANGE_NAME = Notification.Name.init(rawValue: "net.riperion.rodent.authChange")
+let UPDATE_FEED_NOTIFICATION = Notification.Name.init(rawValue: "net.riperion.rodent.updateFeed")
 
 public class API {
     let BASE_URL = "https://rodent.riperion.net/api/"
@@ -80,7 +80,7 @@ public class API {
     }
     
     private func sendAuthChangeNotification() {
-        NotificationCenter.default.post(name: AUTHENTICATION_CHANGE_NAME, object: nil)
+        NotificationCenter.default.post(name: UPDATE_FEED_NOTIFICATION, object: nil)
     }
     
     // MARK: - Data serialization
@@ -131,18 +131,18 @@ public class API {
                           parameters: parameters,
                           encoding: JSONEncoding.default)
             .response() { response in
-                if response.response?.statusCode != 200 {
+                if response.response?.statusCode != 201 {
                     completion(nil)
                     return
                 }
                 
-                let user = try! self.decoder.decode(User.self, from: response.data!)
                 completion(user)
             }
     }
     
     func add(sighting: Sighting,
              completion: @escaping (Sighting?) -> ()) {
+    
         if !isAuthorized {
             completion(nil)
             return
@@ -153,9 +153,10 @@ public class API {
         Alamofire.request(url(path: "ratsightings/"),
                           method: .post,
                           parameters: parameters,
-                          encoding: JSONEncoding.default)
+                          encoding: JSONEncoding.default,
+                          headers: self.authorizedHeaders)
             .response() { response in
-                let successful = response.response?.statusCode != 200
+                let successful = response.response?.statusCode == 201
                 completion(successful ? sighting : nil)
             }
     }

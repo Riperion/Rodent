@@ -11,15 +11,25 @@ import UIKit
 class AppViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        if !API.sharedInstance.isAuthorized {
-            self.present(authenticationViewController(), animated: animated, completion: nil)
+        
+        NotificationCenter.default.addObserver(forName: AUTH_CHANGE_NOTIFICATION,
+                                               object: nil,
+                                               queue: OperationQueue.main) { _ in
+            self.presentAuthenticationControllerIfNeeded()
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        presentAuthenticationControllerIfNeeded()
+    }
+    
     // MARK: - Authentication
+    func presentAuthenticationControllerIfNeeded() {
+        if !API.sharedInstance.isAuthorized {
+            self.present(authenticationViewController(), animated: true, completion: nil)
+        }
+    }
+    
     func authenticationViewController() -> UIViewController {
         return self
             .storyboard!

@@ -10,6 +10,9 @@ import UIKit
 
 // Not in the keychain, RIP. This is a simple class project written in a day.
 let AUTH_TOKEN_KEY = "net.riperion.rodent.authtoken"
+let AUTH_CHANGE_NOTIFICATION = Notification.Name.init("net.riperion.rodent.auth_change")
+
+let SIGHTING_DETAIL_STORYBOARD_ID = "sightingDetail"
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

@@ -12,6 +12,8 @@
 		4119B3751FC9473700B44060 /* AppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4119B3741FC9473700B44060 /* AppViewController.swift */; };
 		4129EA3D1FCA01D600D65896 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4129EA3C1FCA01D600D65896 /* API.swift */; };
 		4129EA401FCA01F200D65896 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4129EA3F1FCA01F200D65896 /* Model.swift */; };
+		415290481FD6392F008DDCEF /* RatSightingDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415290471FD6392F008DDCEF /* RatSightingDetailViewController.swift */; };
+		4152904A1FD63D55008DDCEF /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415290491FD63D55008DDCEF /* NavigationController.swift */; };
 		41C61E7B1FD5B44F004CEA43 /* SightingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */; };
 		41C61E7E1FD5B5A6004CEA43 /* RatSightingTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */; };
 		41C61E801FD5CF4A004CEA43 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */; };
@@ -29,6 +31,8 @@
 		4119B3741FC9473700B44060 /* AppViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewController.swift; sourceTree = "<group>"; };
 		4129EA3C1FCA01D600D65896 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		4129EA3F1FCA01F200D65896 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		415290471FD6392F008DDCEF /* RatSightingDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatSightingDetailViewController.swift; sourceTree = "<group>"; };
+		415290491FD63D55008DDCEF /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		41C61E7A1FD5B44F004CEA43 /* SightingTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SightingTableViewCell.swift; sourceTree = "<group>"; };
 		41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatSightingTableViewController.swift; sourceTree = "<group>"; };
 		41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -59,11 +63,13 @@
 		4119B3711FC93FA200B44060 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				415290491FD63D55008DDCEF /* NavigationController.swift */,
 				4119B36F1FC93F9A00B44060 /* LoginTableViewController.swift */,
 				4119B3741FC9473700B44060 /* AppViewController.swift */,
 				41C61E7D1FD5B5A6004CEA43 /* RatSightingTableViewController.swift */,
 				41C61E7F1FD5CF4A004CEA43 /* MapViewController.swift */,
 				41C61E811FD5EE64004CEA43 /* AddRatSightingTableViewController.swift */,
+				415290471FD6392F008DDCEF /* RatSightingDetailViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -266,6 +272,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41EA8C781FAA3C9A003EEC6C /* AppDelegate.swift in Sources */,
+				4152904A1FD63D55008DDCEF /* NavigationController.swift in Sources */,
 				4119B3701FC93F9A00B44060 /* LoginTableViewController.swift in Sources */,
 				41C61E821FD5EE64004CEA43 /* AddRatSightingTableViewController.swift in Sources */,
 				41C61E7E1FD5B5A6004CEA43 /* RatSightingTableViewController.swift in Sources */,
@@ -275,6 +282,7 @@
 				4129EA401FCA01F200D65896 /* Model.swift in Sources */,
 				4119B3731FC9465C00B44060 /* Constants.swift in Sources */,
 				4129EA3D1FCA01D600D65896 /* API.swift in Sources */,
+				415290481FD6392F008DDCEF /* RatSightingDetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,11 +421,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UY49JV8G34;
+				DEVELOPMENT_TEAM = J7L887K9R5;
 				INFOPLIST_FILE = Rodent/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = net.riperion.Rodent;
+				PRODUCT_BUNDLE_IDENTIFIER = net.riperion.rodentapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -430,11 +438,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = UY49JV8G34;
+				DEVELOPMENT_TEAM = J7L887K9R5;
 				INFOPLIST_FILE = Rodent/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = net.riperion.Rodent;
+				PRODUCT_BUNDLE_IDENTIFIER = net.riperion.rodentapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

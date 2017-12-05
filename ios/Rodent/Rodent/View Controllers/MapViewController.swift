@@ -9,14 +9,18 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController {
+class MapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var mapView: MKMapView!
+
     var sightings: [Sighting]?
+    let NUMBER_PINS = 300
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NotificationCenter.default.addObserver(forName: AUTHENTICATION_CHANGE_NAME,
+        mapView.delegate = self
+        
+        NotificationCenter.default.addObserver(forName: UPDATE_FEED_NOTIFICATION,
                                                object: nil,
                                                queue: OperationQueue.main) { notification in
                                                 self.updateSightings()
@@ -26,7 +30,7 @@ class MapViewController: UIViewController {
     }
 
     func updateSightings() {
-        API.sharedInstance.getSightings(API.Pagination(offset: 0, limit: 0)) {
+        API.sharedInstance.getSightings(API.Pagination(offset: 0, limit: NUMBER_PINS)) {
             sightings in
             self.sightings = sightings
             
@@ -36,5 +40,16 @@ class MapViewController: UIViewController {
                 self.mapView.showAnnotations(annotations, animated: true)
             }
         }
+    }
+    
+    // MARK: - Map View Delegate
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        let sightingPin = view.annotation as! SightingPin
+        
+        let detailViewController = self.storyboard?.instantiateViewController(withIdentifier: SIGHTING_DETAIL_STORYBOARD_ID) as! RatSightingDetailViewController
+        detailViewController.loadSighting(sighting: sightingPin.sighting)
+        self.navigationController?.pushViewController(detailViewController, animated: true)
+        
+        mapView.deselectAnnotation(sightingPin, animated: false)
     }
 }
